@@ -1,15 +1,11 @@
 # SOPS configuration for secrets encryption
-# Replace the age public key below with your own key's public key
-# Generate a key: age-keygen -o ~/.config/sops/age/keys.txt
-# Get public key: grep "public key:" ~/.config/sops/age/keys.txt
+# Only secrets.yaml is encrypted - all other config files are non-sensitive
+#
+# Setup:
+#   age-keygen -o ~/.config/sops/age/keys.txt
+#   Update the 'age' key below with your public key
 
 creation_rules:
-  # Host credentials (Proxmox API tokens, passwords)
-  - path_regex: hosts/.*\.tfvars$
-    age: >-
-      age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-  # Environment configs (tofu tfvars)
-  - path_regex: envs/.*/.*\.tfvars$
-    age: >-
-      age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  # Single secrets file containing all sensitive values
+  - path_regex: secrets\.yaml$
+    age: age19g7xlyf8fndus5zzh72w7hlac28fzefwasa2rh6aju74eyh2tq8q2jhc2g

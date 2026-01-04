@@ -1,10 +1,16 @@
 # site-config
 
-Site-specific configuration template for [homestak](https://github.com/homestak-dev) deployments.
+Site-specific configuration for [homestak](https://github.com/homestak-dev) deployments.
 
 ## Overview
 
-This repository provides a template structure for managing encrypted credentials and environment-specific configuration. Clone or fork this repo to store your site's secrets.
+Normalized 4-entity configuration structure separating:
+- **hosts/** - Physical machines (Ansible)
+- **nodes/** - PVE instances (Tofu API access)
+- **vms/** - VM templates (future)
+- **envs/** - Deployment topologies
+
+All secrets are centralized in a single encrypted `secrets.yaml` file.
 
 ## Quick Start
 
@@ -16,41 +22,58 @@ cd site-config
 # Setup encryption
 make setup
 
-# Copy templates and fill in your values
-cp hosts/example.tfvars.tpl hosts/mypve.tfvars
-# Edit hosts/mypve.tfvars with real values
+# Create your configuration
+cp hosts/example.yaml.tpl hosts/mypve.yaml
+cp nodes/example.yaml.tpl nodes/mypve.yaml
+cp envs/example.yaml.tpl envs/dev.yaml
 
-cp -r envs/example envs/dev
-cp envs/dev/terraform.tfvars.tpl envs/dev/terraform.tfvars
-# Edit envs/dev/terraform.tfvars with real values
+# Create secrets.yaml with your values
+cat > secrets.yaml << 'EOF'
+api_tokens:
+  mypve: "root@pam!tofu=YOUR-TOKEN-HERE"
 
-# Encrypt your secrets
+passwords:
+  vm_root: "$6$YOUR-HASH-HERE"
+
+ssh_keys:
+  admin: "ssh-rsa YOUR-KEY-HERE"
+EOF
+
+# Encrypt secrets
 make encrypt
-
-# (Optional) Commit encrypted secrets to private fork
-# Remove *.enc lines from .gitignore first
 ```
 
 ## Structure
 
 ```
 site-config/
-├── hosts/                  # Per-host Proxmox credentials
-│   ├── example.tfvars.tpl  # Template (copy and rename)
-│   └── mypve.tfvars        # Your host config (gitignored)
-│
-└── envs/                   # Per-environment tofu config
-    ├── example/            # Template environment
-    │   └── terraform.tfvars.tpl
-    └── dev/                # Your environment (copy from example)
-        └── terraform.tfvars
+├── site.yaml              # Non-sensitive defaults (timezone, datastore)
+├── secrets.yaml           # ALL secrets (encrypted with SOPS)
+├── hosts/                 # Physical machines
+│   └── mypve.yaml         # SSH access, (future: network, storage)
+├── nodes/                 # PVE instances
+│   └── mypve.yaml         # API endpoint, token ref, datastore
+└── envs/                  # Deployment configs
+    └── dev.yaml           # Node reference, env-specific settings
+```
+
+## Entity Relationships
+
+```
+secrets.yaml ─────┐
+                  │ (token refs)
+site.yaml ────────┼───> nodes/*.yaml ◄──── envs/*.yaml
+                  │          │
+                  │          │ FK: host
+                  │          ▼
+                  └───> hosts/*.yaml
 ```
 
 ## Encryption
 
-Secrets are encrypted with [SOPS](https://github.com/getsops/sops) + [age](https://github.com/FiloSottile/age).
+Only `secrets.yaml` is encrypted - all other config is non-sensitive.
 
-### First-Time Setup
+### Setup
 
 1. Install dependencies:
    ```bash
@@ -58,60 +81,74 @@ Secrets are encrypted with [SOPS](https://github.com/getsops/sops) + [age](https
    # Install sops from https://github.com/getsops/sops/releases
    ```
 
-2. Generate an age key:
+2. Generate age key:
    ```bash
    mkdir -p ~/.config/sops/age
    age-keygen -o ~/.config/sops/age/keys.txt
    chmod 600 ~/.config/sops/age/keys.txt
    ```
 
-3. Update `.sops.yaml` with your public key:
-   ```bash
-   grep "public key:" ~/.config/sops/age/keys.txt
-   # Copy the key and replace placeholder in .sops.yaml
-   ```
+3. Update `.sops.yaml` with your public key
 
 4. Run setup:
    ```bash
    make setup
    ```
 
-### Makefile Targets
+### Commands
 
-| Target | Description |
-|--------|-------------|
+| Command | Description |
+|---------|-------------|
 | `make setup` | Configure git hooks, check dependencies |
-| `make encrypt` | Encrypt all plaintext files to `.enc` |
-| `make decrypt` | Decrypt all `.enc` files to plaintext |
-| `make clean` | Remove plaintext files (keeps `.enc`) |
-| `make check` | Verify encryption setup |
+| `make encrypt` | Encrypt secrets.yaml |
+| `make decrypt` | Decrypt secrets.yaml.enc |
+| `make clean` | Remove plaintext secrets.yaml |
+| `make check` | Show setup status |
+| `make validate` | Validate YAML syntax |
 
 ## Discovery
 
-Other homestak tools find site-config automatically:
-
-1. `$HOMESTAK_SITE_CONFIG` environment variable (if set)
+Tools find site-config via:
+1. `$HOMESTAK_SITE_CONFIG` environment variable
 2. `../site-config/` sibling directory
 3. `/opt/homestak/site-config/` (bootstrap default)
 
-## Committing Encrypted Secrets
+## Entity Files
 
-By default, `.gitignore` blocks both plaintext AND encrypted files (this is a public template).
+### site.yaml
+```yaml
+defaults:
+  timezone: America/Denver
+  domain: local
+  datastore: local-zfs
+  ssh_user: root
+```
 
-To commit encrypted secrets to a private fork:
+### secrets.yaml
+```yaml
+api_tokens:
+  mypve: "root@pam!tofu=..."
+passwords:
+  vm_root: "$6$..."
+ssh_keys:
+  admin: "ssh-rsa ..."
+```
 
-1. Remove these lines from `.gitignore`:
-   ```
-   *.tfvars.enc
-   *.yaml.enc
-   *.json.enc
-   ```
+### nodes/mypve.yaml
+```yaml
+node: mypve
+host: mypve
+api_endpoint: "https://mypve.local:8006"
+api_token: mypve      # References secrets.api_tokens.mypve
+datastore: local-zfs
+```
 
-2. Add and commit your encrypted files:
-   ```bash
-   git add hosts/*.enc envs/*/*.enc
-   git commit -m "Add encrypted site configuration"
-   ```
+### envs/dev.yaml
+```yaml
+env: dev
+node: mypve           # References nodes/mypve.yaml
+node_ip: "10.0.0.100"
+```
 
 ## Related Repos
 

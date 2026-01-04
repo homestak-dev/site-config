@@ -1,0 +1,8 @@
+# Site-wide defaults (non-sensitive)
+# Sensitive values are in secrets.yaml
+
+defaults:
+  timezone: America/Denver
+  domain: local
+  datastore: local-zfs
+  ssh_user: root

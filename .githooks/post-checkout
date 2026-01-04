@@ -1,5 +1,5 @@
 #!/bin/bash
-# Auto-decrypt .enc files after checkout
+# Auto-decrypt secrets.yaml.enc after checkout
 
 cd "$(git rev-parse --show-toplevel)"
 
@@ -10,15 +10,13 @@ if [ ! -f ~/.config/sops/age/keys.txt ]; then
     exit 0
 fi
 
-# Decrypt .enc files if plaintext is missing or older
-for encfile in $(find hosts envs -name "*.enc" -type f 2>/dev/null); do
-    plainfile="${encfile%.enc}"
-
-    if [ ! -f "$plainfile" ] || [ "$encfile" -nt "$plainfile" ]; then
-        echo "Decrypting: $encfile -> $plainfile"
-        if ! sops -d "$encfile" > "$plainfile" 2>/dev/null; then
-            echo "Warning: Failed to decrypt $encfile (wrong key?)"
-            rm -f "$plainfile"
+# Decrypt secrets.yaml.enc if plaintext is missing or older
+if [ -f "secrets.yaml.enc" ]; then
+    if [ ! -f "secrets.yaml" ] || [ "secrets.yaml.enc" -nt "secrets.yaml" ]; then
+        echo "Decrypting: secrets.yaml.enc -> secrets.yaml"
+        if ! sops -d "secrets.yaml.enc" > "secrets.yaml" 2>/dev/null; then
+            echo "Warning: Failed to decrypt secrets.yaml.enc (wrong key?)"
+            rm -f "secrets.yaml"
         fi
     fi
-done
+fi

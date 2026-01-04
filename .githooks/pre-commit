@@ -1,36 +1,31 @@
 #!/bin/bash
-# Auto-encrypt modified plaintext files, block plaintext commits
+# Auto-encrypt secrets.yaml, block plaintext commits
 
 set -e
 
 cd "$(git rev-parse --show-toplevel)"
 
-# Find plaintext files that have been modified and encrypt them
-for plainfile in $(find hosts envs -type f -name "*.tfvars" ! -name "*.enc" 2>/dev/null); do
-    encfile="${plainfile}.enc"
-
-    # If plaintext is newer than encrypted (or encrypted doesn't exist), re-encrypt
-    if [ ! -f "$encfile" ] || [ "$plainfile" -nt "$encfile" ]; then
-        echo "Encrypting: $plainfile -> $encfile"
-        sops -e "$plainfile" > "$encfile"
-        git add "$encfile"
+# Auto-encrypt secrets.yaml if it's newer than secrets.yaml.enc
+if [ -f "secrets.yaml" ]; then
+    if [ ! -f "secrets.yaml.enc" ] || [ "secrets.yaml" -nt "secrets.yaml.enc" ]; then
+        echo "Encrypting: secrets.yaml -> secrets.yaml.enc"
+        sops -e "secrets.yaml" > "secrets.yaml.enc"
+        git add "secrets.yaml.enc"
     fi
-done
+fi
 
-# Block any plaintext secrets from being committed
-PLAINTEXT_STAGED=$(git diff --cached --name-only | grep -E "^(hosts|envs)/.*\.tfvars$" | grep -v "\.enc" || true)
-if [ -n "$PLAINTEXT_STAGED" ]; then
-    echo "ERROR: Plaintext secrets staged for commit:"
-    echo "$PLAINTEXT_STAGED"
+# Block plaintext secrets.yaml from being committed
+if git diff --cached --name-only | grep -q "^secrets\.yaml$"; then
+    echo "ERROR: Plaintext secrets.yaml staged for commit!"
     echo ""
-    echo "These files should be gitignored. Run: git reset HEAD <file>"
+    echo "This file should be gitignored. Run: git reset HEAD secrets.yaml"
     exit 1
 fi
 
-# Verify staged .enc files are actually encrypted
-for encfile in $(git diff --cached --name-only | grep "\.enc$" || true); do
-    if [ -f "$encfile" ] && ! grep -qE '(^sops:|"sops":)' "$encfile" 2>/dev/null; then
-        echo "ERROR: $encfile doesn't appear to be SOPS-encrypted"
+# Verify staged secrets.yaml.enc is actually encrypted
+if git diff --cached --name-only | grep -q "^secrets\.yaml\.enc$"; then
+    if [ -f "secrets.yaml.enc" ] && ! grep -qE '(^sops:|"sops":)' "secrets.yaml.enc" 2>/dev/null; then
+        echo "ERROR: secrets.yaml.enc doesn't appear to be SOPS-encrypted"
         exit 1
     fi
-done
+fi

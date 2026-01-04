@@ -1,7 +1,14 @@
 # site-config Makefile
 # Secrets management for homestak deployments
+#
+# Structure:
+#   secrets.yaml     - ALL sensitive values (encrypted)
+#   site.yaml        - Non-sensitive defaults
+#   hosts/*.yaml     - Physical machine config
+#   nodes/*.yaml     - PVE instance config
+#   envs/*.yaml      - Deployment config
 
-.PHONY: help setup decrypt encrypt clean check
+.PHONY: help setup decrypt encrypt clean check validate
 
 help:
 	@echo "site-config - Site-specific configuration management"
@@ -10,10 +17,13 @@ help:
 	@echo "  make setup    - Configure git hooks and check dependencies"
 	@echo ""
 	@echo "Secrets Management:"
-	@echo "  make decrypt  - Decrypt all .enc files to plaintext"
-	@echo "  make encrypt  - Encrypt all plaintext files to .enc"
-	@echo "  make clean    - Remove plaintext files (keeps .enc)"
+	@echo "  make decrypt  - Decrypt secrets.yaml.enc to secrets.yaml"
+	@echo "  make encrypt  - Encrypt secrets.yaml to secrets.yaml.enc"
+	@echo "  make clean    - Remove plaintext secrets.yaml (keeps .enc)"
 	@echo "  make check    - Verify encryption setup"
+	@echo ""
+	@echo "Validation:"
+	@echo "  make validate - Validate YAML syntax (optional)"
 	@echo ""
 	@echo "Prerequisites:"
 	@echo "  - age:  apt install age"
@@ -52,30 +62,32 @@ decrypt:
 		echo "Run 'make setup' for instructions."; \
 		exit 1; \
 	fi
-	@for encfile in $$(find hosts envs -name "*.enc" -type f 2>/dev/null); do \
-		plainfile="$${encfile%.enc}"; \
-		echo "Decrypting: $$encfile -> $$plainfile"; \
-		sops -d "$$encfile" > "$$plainfile" || (rm -f "$$plainfile" && exit 1); \
-	done
-	@echo "Done."
+	@if [ -f secrets.yaml.enc ]; then \
+		echo "Decrypting: secrets.yaml.enc -> secrets.yaml"; \
+		sops --input-type yaml --output-type yaml -d secrets.yaml.enc > secrets.yaml || (rm -f secrets.yaml && exit 1); \
+		echo "Done."; \
+	else \
+		echo "No secrets.yaml.enc found. Nothing to decrypt."; \
+	fi
 
 encrypt:
-	@for plainfile in $$(find hosts envs -type f -name "*.tfvars" ! -name "*.enc" 2>/dev/null); do \
-		encfile="$${plainfile}.enc"; \
-		echo "Encrypting: $$plainfile -> $$encfile"; \
-		sops -e "$$plainfile" > "$$encfile"; \
-	done
-	@echo "Done. Encrypted files are ready."
+	@if [ ! -f secrets.yaml ]; then \
+		echo "ERROR: No secrets.yaml found. Create it first."; \
+		exit 1; \
+	fi
+	@echo "Encrypting: secrets.yaml -> secrets.yaml.enc"
+	@sops --input-type yaml --output-type yaml -e secrets.yaml > secrets.yaml.enc
+	@echo "Done."
 	@echo ""
 	@echo "To commit encrypted secrets to a private fork:"
-	@echo "  1. Remove *.enc patterns from .gitignore"
-	@echo "  2. git add hosts/*.enc envs/*/*.enc"
+	@echo "  1. Remove secrets.yaml.enc from .gitignore"
+	@echo "  2. git add secrets.yaml.enc"
 	@echo "  3. git commit"
 
 clean:
 	@echo "Removing plaintext secrets..."
-	@find hosts envs -type f -name "*.tfvars" ! -name "*.enc" -delete 2>/dev/null || true
-	@echo "Done. Only .enc files remain."
+	@rm -f secrets.yaml
+	@echo "Done. Only secrets.yaml.enc remains."
 
 check:
 	@echo "Checking setup..."
@@ -95,8 +107,24 @@ check:
 		echo "  NOT FOUND"; \
 	fi
 	@echo ""
-	@echo "Encrypted files:"
-	@find hosts envs -name "*.enc" -type f 2>/dev/null | wc -l | xargs printf "  %s .enc files\n"
+	@echo "Secrets file:"
+	@if [ -f secrets.yaml.enc ]; then echo "  secrets.yaml.enc: EXISTS"; else echo "  secrets.yaml.enc: NOT FOUND"; fi
+	@if [ -f secrets.yaml ]; then echo "  secrets.yaml: EXISTS (plaintext)"; else echo "  secrets.yaml: NOT FOUND"; fi
 	@echo ""
-	@echo "Plaintext files:"
-	@find hosts envs -type f -name "*.tfvars" ! -name "*.enc" 2>/dev/null | wc -l | xargs printf "  %s plaintext files\n"
+	@echo "Config files:"
+	@printf "  site.yaml:   " && ([ -f site.yaml ] && echo "EXISTS" || echo "NOT FOUND")
+	@printf "  hosts/:      " && (ls -1 hosts/*.yaml 2>/dev/null | wc -l | xargs printf "%s files\n")
+	@printf "  nodes/:      " && (ls -1 nodes/*.yaml 2>/dev/null | wc -l | xargs printf "%s files\n")
+	@printf "  envs/:       " && (ls -1 envs/*.yaml 2>/dev/null | wc -l | xargs printf "%s files\n")
+
+validate:
+	@echo "Validating YAML syntax..."
+	@for f in site.yaml hosts/*.yaml nodes/*.yaml envs/*.yaml; do \
+		if [ -f "$$f" ]; then \
+			python3 -c "import yaml; yaml.safe_load(open('$$f'))" 2>/dev/null && echo "  $$f: OK" || echo "  $$f: INVALID"; \
+		fi; \
+	done
+	@if [ -f secrets.yaml ]; then \
+		python3 -c "import yaml; yaml.safe_load(open('secrets.yaml'))" 2>/dev/null && echo "  secrets.yaml: OK" || echo "  secrets.yaml: INVALID"; \
+	fi
+	@echo "Done."

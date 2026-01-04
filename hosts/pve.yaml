@@ -1,0 +1,9 @@
+# Physical host: pve (generic/alias)
+# Rich config (network, storage) added in Phase 4
+
+host: pve
+
+access:
+  ssh_user: root
+  authorized_keys:
+    - jderose           # FK -> secrets.ssh_keys.jderose
