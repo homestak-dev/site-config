@@ -15,3 +15,7 @@ proxmox_api_token = "root@pam!tofu=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 # Root password hash (generate with: mkpasswd -m sha-512)
 # Used for cloud-init VM provisioning
 root_password_hash = "$6$rounds=500000$salt$hash..."
+
+# SSH user for iac-driver and tofu provider (default: root)
+# Use non-root user with sudo if root SSH is disabled
+ssh_user = "root"
