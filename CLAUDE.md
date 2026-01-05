@@ -35,9 +35,9 @@ site-config/
 ├── site.yaml              # Non-sensitive site-wide defaults
 ├── secrets.yaml           # ALL sensitive values (SOPS encrypted)
 ├── secrets.yaml.enc       # Encrypted version (committed to private forks)
-├── hosts/                 # Physical machines (Ansible domain)
+├── hosts/                 # Physical machines
 │   └── {name}.yaml        # SSH access (Phase 4: network, storage)
-├── nodes/                 # PVE instances (Tofu API access)
+├── nodes/                 # PVE instances
 │   ├── pve.yaml           # Generic example (localhost:8006)
 │   └── nested-pve.yaml    # Nested PVE (parent_node reference)
 ├── vms/                   # VM templates (Phase 5)
@@ -148,11 +148,11 @@ The config-loader module (tofu) or iac-driver resolves these at runtime.
 
 ## Related Repos
 
-| Repo | Consumes |
-|------|----------|
-| iac-driver | `nodes/*.yaml` + `secrets.yaml` for host config |
-| tofu | `nodes/*.yaml` + `envs/*.yaml` + `secrets.yaml` for deployments |
-| ansible | `hosts/*.yaml` for machine configuration |
+| Repo | Uses |
+|------|------|
+| iac-driver | `nodes/*.yaml` + `secrets.yaml` for orchestration |
+| tofu | `nodes/*.yaml` + `envs/*.yaml` + `secrets.yaml` for provisioning |
+| ansible | `hosts/*.yaml` for host configuration |
 | bootstrap | Clones and sets up site-config |
 
 ## Migration from tfvars

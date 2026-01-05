@@ -5,8 +5,8 @@ Site-specific configuration for [homestak](https://github.com/homestak-dev) depl
 ## Overview
 
 Normalized 4-entity configuration structure separating:
-- **hosts/** - Physical machines (Ansible)
-- **nodes/** - PVE instances (Tofu API access)
+- **hosts/** - Physical machines (SSH access, storage, network)
+- **nodes/** - PVE instances (API access)
 - **vms/** - VM templates (Phase 5)
 - **envs/** - Deployment topology templates (node-agnostic)
 
@@ -52,8 +52,10 @@ site-config/
 │   └── {name}.yaml        # SSH access (Phase 4: network, storage)
 ├── nodes/                 # PVE instances
 │   └── {name}.yaml        # API endpoint, token ref, IP, datastore
+├── vms/                   # VM templates (Phase 5)
+│   └── {name}.yaml        # (future)
 └── envs/                  # Deployment topology templates (node-agnostic)
-    └── {name}.yaml        # Node specified at deploy time
+    └── {name}.yaml        # Host specified at deploy time
 ```
 
 ## Schema
@@ -78,6 +80,15 @@ passwords:
   vm_root: "$6$..."
 ssh_keys:
   admin: "ssh-rsa ..."
+```
+
+### hosts/{name}.yaml
+```yaml
+# Primary key derived from filename: pve.yaml -> pve
+access:
+  ssh_user: root
+  authorized_keys:
+    - admin                       # FK -> secrets.ssh_keys.admin
 ```
 
 ### nodes/{name}.yaml
