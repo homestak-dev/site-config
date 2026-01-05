@@ -1,6 +1,6 @@
 # Nested PVE instance (runs as VM, no physical host)
 # Primary key derived from filename: pve-deb.yaml -> pve-deb
-parent_node: father       # FK -> nodes/father.yaml (where this VM runs)
+parent_node: pve          # FK -> nodes/pve.yaml (where this VM runs)
 api_endpoint: "https://localhost:8006"
 api_token: pve-deb        # FK -> secrets.api_tokens.pve-deb
 datastore: local
