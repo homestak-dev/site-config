@@ -52,8 +52,9 @@ site-config/
 │   └── {name}.yaml        # SSH access (Phase 4: network, storage)
 ├── nodes/                 # PVE instances
 │   └── {name}.yaml        # API endpoint, token ref, IP, datastore
-├── vms/                   # VM templates (Phase 5)
-│   └── {name}.yaml        # (future)
+├── vms/                   # VM templates
+│   ├── presets/           # Size presets (tiny, small, medium, large, xlarge)
+│   └── {name}.yaml        # Custom templates (image, preset, overrides)
 └── envs/                  # Deployment topology templates (node-agnostic)
     └── {name}.yaml        # Host specified at deploy time
 ```
@@ -100,13 +101,34 @@ api_token: pve                    # FK -> secrets.api_tokens.pve
 ip: "10.0.0.1"                    # Node IP for SSH access
 ```
 
+### vms/presets/{size}.yaml
+```yaml
+# Size preset: tiny, small, medium, large, xlarge
+cores: 2
+memory: 4096    # MB
+disk: 16        # GB
+```
+
+### vms/{name}.yaml
+```yaml
+# Primary key derived from filename: test.yaml -> test
+image: debian-12
+preset: small            # FK -> vms/presets/small.yaml (optional)
+# cores, memory, disk override preset if specified
+```
+
 ### envs/{name}.yaml
 ```yaml
 # Primary key derived from filename: dev.yaml -> dev
 # Node-agnostic template - target host specified at deploy time
----
-{}
-# Phase 5: VM topology definition
+vmid_base: 10000         # Auto-increment: base + index (omit for PVE auto-assign)
+
+vms:
+  - name: dev1
+    template: test       # FK -> vms/test.yaml
+  - name: dev2
+    template: test
+    vmid: 50001          # Override: explicit vmid
 ```
 
 ## Deploy Pattern
