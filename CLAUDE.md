@@ -89,7 +89,7 @@ Primary key derived from filename (e.g., `small.yaml` → `small`).
 - `memory` - RAM in MB
 - `disk` - Disk size in GB
 
-Available presets: `xsmall` (1c/1GB/8GB), `small` (2c/1GB/8GB), `medium` (2c/4GB/16GB), `large` (4c/8GB/32GB), `xlarge` (8c/16GB/64GB)
+Available presets: `xsmall` (1c/1GB/8GB), `small` (2c/2GB/8GB), `medium` (2c/4GB/16GB), `large` (4c/8GB/32GB), `xlarge` (8c/16GB/64GB)
 
 ### vms/{name}.yaml
 VM template defining base configuration.
