@@ -1,7 +1,6 @@
 # Physical host: mother
+# Primary key derived from filename: mother.yaml -> mother
 # Rich config (network, storage) added in Phase 4
-
-host: mother
 
 access:
   ssh_user: root

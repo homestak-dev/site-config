@@ -1,7 +1,6 @@
 # Physical host: father
+# Primary key derived from filename: father.yaml -> father
 # Rich config (network, storage) added in Phase 4
-
-host: father
 
 access:
   ssh_user: jderose

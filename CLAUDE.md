@@ -18,11 +18,15 @@ Site-specific configuration for homestak deployments using a normalized 4-entity
        │ FK: host                          │ FK: vm
        ▼                                   ▼
 ┌─────────────┐                     ┌─────────────┐
-│   nodes/    │◄────── FK: node ────│   envs/     │
-│  (PVE API)  │      (deploy-time)  │ (topology)  │
+│   nodes/    │◄── -var="node=X" ──│   envs/     │
+│  (PVE API)  │    (deploy-time)   │ (templates) │
 │    Tofu     │                     │    Tofu     │
 └─────────────┘                     └─────────────┘
 ```
+
+**Note:** Primary keys are derived from filenames (e.g., `hosts/father.yaml` → identifier is `father`).
+Envs are node-agnostic templates; the target node is specified at deploy time via `-var="node=..."`.
+Foreign keys (FK) are explicit references between entities.
 
 ## Structure
 
@@ -40,8 +44,8 @@ site-config/
 │   └── pve-deb.yaml       # Nested PVE (parent_node reference)
 ├── vms/                   # VM templates (Phase 5)
 │   └── (future)
-└── envs/                  # Deployment topologies
-    ├── dev.yaml           # node reference, env-specific config
+└── envs/                  # Deployment topology templates (node-agnostic)
+    ├── dev.yaml           # env-specific config, node at deploy time
     ├── test.yaml
     └── k8s.yaml
 ```
@@ -62,25 +66,25 @@ ALL sensitive values in one file (encrypted):
 - `ssh_keys.{user}` - SSH public keys
 
 ### hosts/{name}.yaml
-Physical machine configuration (Ansible consumes):
-- `host` - Machine identifier
+Physical machine configuration (Ansible consumes).
+Primary key derived from filename (e.g., `father.yaml` → `father`).
 - `access.ssh_user` - SSH username
-- `access.authorized_keys` - References to secrets.ssh_keys
+- `access.authorized_keys` - References to secrets.ssh_keys (FK)
 - (Phase 4: network, storage, system config)
 
 ### nodes/{name}.yaml
-PVE instance configuration (Tofu consumes):
-- `node` - PVE node identifier
+PVE instance configuration (Tofu consumes).
+Primary key derived from filename (e.g., `pve.yaml` → `pve`).
 - `host` - FK to hosts/ (physical machine)
 - `parent_node` - FK to nodes/ (for nested PVE)
 - `api_endpoint` - Proxmox API URL
-- `api_token` - Reference to secrets.api_tokens
+- `api_token` - Reference to secrets.api_tokens (FK)
 - `datastore` - Default storage
 
 ### envs/{name}.yaml
-Deployment configuration (Tofu consumes):
-- `env` - Environment identifier
-- `node` - FK to nodes/ (deployment target)
+Deployment topology template (Tofu consumes).
+Primary key derived from filename (e.g., `dev.yaml` → `dev`).
+Node-agnostic: target node specified at deploy time via `-var="node=..."`.
 - `node_ip` - Target node IP (optional)
 - (Phase 5: VM topology, network config)
 

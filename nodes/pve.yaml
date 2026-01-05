@@ -1,6 +1,6 @@
 # PVE instance (generic/alias)
-node: pve
-host: pve                 # FK -> hosts/pve.yaml (if exists)
+# Primary key derived from filename: pve.yaml -> pve
+host: pve                 # FK -> hosts/pve.yaml
 api_endpoint: "https://pve.homestak:8006"
 api_token: pve            # FK -> secrets.api_tokens.pve
 datastore: local-zfs
