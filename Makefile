@@ -8,13 +8,16 @@
 #   nodes/*.yaml     - PVE instance config
 #   envs/*.yaml      - Deployment config
 
-.PHONY: help setup decrypt encrypt clean check validate host-config node-config
+SOPS_VERSION := 3.11.0
+
+.PHONY: help setup install-deps decrypt encrypt clean check validate host-config node-config
 
 help:
 	@echo "site-config - Site-specific configuration management"
 	@echo ""
 	@echo "Setup:"
-	@echo "  make setup       - Configure git hooks and check dependencies"
+	@echo "  make install-deps - Install age and sops (requires root)"
+	@echo "  make setup        - Configure git hooks and check dependencies"
 	@echo ""
 	@echo "Config Generation (run on target host):"
 	@echo "  make host-config - Generate hosts/{hostname}.yaml from system info"
@@ -29,11 +32,36 @@ help:
 	@echo "Validation:"
 	@echo "  make validate    - Validate YAML syntax (optional)"
 	@echo ""
-	@echo "Prerequisites:"
+	@echo "Prerequisites: Run 'sudo make install-deps' or install manually:"
 	@echo "  - age:  apt install age"
 	@echo "  - sops: https://github.com/getsops/sops/releases"
 	@echo ""
 	@echo "Age key location: ~/.config/sops/age/keys.txt"
+
+install-deps:
+	@echo "Installing dependencies..."
+	@if [ "$$(id -u)" != "0" ]; then \
+		echo "ERROR: Must run as root. Use: sudo make install-deps"; \
+		exit 1; \
+	fi
+	@if ! command -v age >/dev/null 2>&1; then \
+		echo "Installing age..."; \
+		apt-get update && apt-get install -y age; \
+	else \
+		echo "age already installed: $$(age --version)"; \
+	fi
+	@if ! command -v sops >/dev/null 2>&1; then \
+		echo "Installing sops $(SOPS_VERSION)..."; \
+		ARCH=$$(dpkg --print-architecture); \
+		curl -fsSL -o /tmp/sops.deb \
+			"https://github.com/getsops/sops/releases/download/v$(SOPS_VERSION)/sops_$(SOPS_VERSION)_$${ARCH}.deb"; \
+		dpkg -i /tmp/sops.deb; \
+		rm -f /tmp/sops.deb; \
+	else \
+		echo "sops already installed: $$(sops --version 2>&1 | head -1)"; \
+	fi
+	@echo ""
+	@echo "Dependencies installed successfully."
 
 setup:
 	@echo "Configuring git hooks..."

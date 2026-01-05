@@ -81,6 +81,11 @@ Only `secrets.yaml` is encrypted - all other config is non-sensitive.
 
 1. Install dependencies:
    ```bash
+   sudo make install-deps
+   ```
+
+   Or manually:
+   ```bash
    apt install age
    # Install sops from https://github.com/getsops/sops/releases
    ```
@@ -103,6 +108,7 @@ Only `secrets.yaml` is encrypted - all other config is non-sensitive.
 
 | Command | Description |
 |---------|-------------|
+| `make install-deps` | Install age and sops (requires root) |
 | `make setup` | Configure git hooks, check dependencies |
 | `make host-config` | Generate hosts/{hostname}.yaml from system info |
 | `make node-config` | Generate nodes/{hostname}.yaml from PVE info |
