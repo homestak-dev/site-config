@@ -1,5 +1,25 @@
 # Changelog
 
+## Unreleased
+
+### Schema Normalization
+
+- **Breaking:** Primary keys now derived from filename (removed redundant `host:`, `node:`, `env:` fields)
+- **Breaking:** Envs are now node-agnostic templates (removed `node:` field from envs/*.yaml)
+- Moved `node_ip` from envs to `ip` field in nodes/*.yaml
+- Renamed `pve-deb` to `nested-pve` for clarity
+- Removed site-specific examples (father, mother) from public template
+- Deleted obsolete .tpl template files
+
+### Deploy Pattern
+
+Envs no longer specify target node. Node is now required at deploy time:
+
+```bash
+tofu apply -var="node=pve"      # Deploy to pve
+tofu apply -var="node=other"    # Deploy same env to different node
+```
+
 ## v0.5.0-rc1 - 2026-01-04
 
 Consolidated pre-release with full tooling.
