@@ -1,0 +1,6 @@
+# Nested PVE VM template
+# Debian 13 (Trixie) for PVE 9.x installation
+image: debian-13
+cores: 2
+memory: 8192
+disk: 64

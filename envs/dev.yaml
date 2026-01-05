@@ -1,6 +1,10 @@
 # Development environment (node-agnostic template)
 # Primary key derived from filename: dev.yaml -> dev
 # Node specified at deploy time via: run.sh --host <name>
-# Full topology definition added in Phase 5
 ---
-{}
+# VM ID allocation: base + index (omit for PVE auto-assign)
+vmid_base: 10000
+
+vms:
+  - name: dev1
+    template: test

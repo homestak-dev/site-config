@@ -1,0 +1,5 @@
+# Large VM preset
+# 4 cores, 8GB RAM, 100GB disk
+cores: 4
+memory: 8192
+disk: 100

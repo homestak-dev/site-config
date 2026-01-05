@@ -1,0 +1,4 @@
+# Test VM template
+# Simple Debian 12 VM using small preset
+image: debian-12
+preset: small
