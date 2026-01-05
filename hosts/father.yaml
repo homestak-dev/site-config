@@ -1,0 +1,9 @@
+# Physical host: father
+# Rich config (network, storage) added in Phase 4
+
+host: father
+
+access:
+  ssh_user: jderose
+  authorized_keys:
+    - jderose           # FK -> secrets.ssh_keys.jderose

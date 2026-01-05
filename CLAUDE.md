@@ -4,77 +4,150 @@ This file provides guidance to Claude Code when working with this repository.
 
 ## Overview
 
-Site-specific configuration template for homestak deployments. This is a **public template repo** - users clone/fork it and add their own secrets.
+Site-specific configuration for homestak deployments using a normalized 4-entity YAML structure. Separates concerns: physical machines, PVE instances, VM templates, and deployment topologies.
+
+## Entity Model (4NF)
+
+```
+┌─────────────┐                     ┌─────────────┐
+│   hosts/    │                     │    vms/     │
+│ (physical)  │                     │ (templates) │
+│  Ansible    │                     │ Tofu/Packer │
+└──────┬──────┘                     └──────┬──────┘
+       │                                   │
+       │ FK: host                          │ FK: vm
+       ▼                                   ▼
+┌─────────────┐                     ┌─────────────┐
+│   nodes/    │◄────── FK: node ────│   envs/     │
+│  (PVE API)  │      (deploy-time)  │ (topology)  │
+│    Tofu     │                     │    Tofu     │
+└─────────────┘                     └─────────────┘
+```
 
 ## Structure
 
 ```
 site-config/
-├── .sops.yaml              # Encryption config (user updates with their key)
-├── .gitignore              # Ignores real secrets by default
-├── .githooks/              # Auto encrypt/decrypt hooks
-├── Makefile                # setup, decrypt, encrypt, clean, check
-├── hosts/                  # Per-host Proxmox credentials
-│   └── example.tfvars.tpl  # Template with placeholder values
-└── envs/                   # Per-environment tofu config
-    └── example/
-        └── terraform.tfvars.tpl
+├── site.yaml              # Non-sensitive site-wide defaults
+├── secrets.yaml           # ALL sensitive values (SOPS encrypted)
+├── secrets.yaml.enc       # Encrypted version (committed to private forks)
+├── hosts/                 # Physical machines (Ansible domain)
+│   ├── father.yaml        # Network, storage, SSH access
+│   └── mother.yaml
+├── nodes/                 # PVE instances (Tofu API access)
+│   ├── father.yaml        # api_endpoint, api_token ref, datastore
+│   ├── mother.yaml
+│   └── pve-deb.yaml       # Nested PVE (parent_node reference)
+├── vms/                   # VM templates (Phase 5)
+│   └── (future)
+└── envs/                  # Deployment topologies
+    ├── dev.yaml           # node reference, env-specific config
+    ├── test.yaml
+    └── k8s.yaml
 ```
 
-## Key Concepts
+## Entity Definitions
 
-### Template vs Real Files
+### site.yaml
+Non-sensitive defaults inherited by all entities:
+- `defaults.timezone`
+- `defaults.domain`
+- `defaults.datastore`
+- `defaults.ssh_user`
 
-- `*.tpl` files are templates with placeholder values (committed)
-- `*.tfvars` files contain real secrets (gitignored)
-- `*.tfvars.enc` files are encrypted secrets (gitignored by default)
+### secrets.yaml
+ALL sensitive values in one file (encrypted):
+- `api_tokens.{node}` - Proxmox API tokens
+- `passwords.vm_root` - VM root password hash
+- `ssh_keys.{user}` - SSH public keys
 
-### Discovery Mechanism
+### hosts/{name}.yaml
+Physical machine configuration (Ansible consumes):
+- `host` - Machine identifier
+- `access.ssh_user` - SSH username
+- `access.authorized_keys` - References to secrets.ssh_keys
+- (Phase 4: network, storage, system config)
+
+### nodes/{name}.yaml
+PVE instance configuration (Tofu consumes):
+- `node` - PVE node identifier
+- `host` - FK to hosts/ (physical machine)
+- `parent_node` - FK to nodes/ (for nested PVE)
+- `api_endpoint` - Proxmox API URL
+- `api_token` - Reference to secrets.api_tokens
+- `datastore` - Default storage
+
+### envs/{name}.yaml
+Deployment configuration (Tofu consumes):
+- `env` - Environment identifier
+- `node` - FK to nodes/ (deployment target)
+- `node_ip` - Target node IP (optional)
+- (Phase 5: VM topology, network config)
+
+## Discovery Mechanism
 
 Other homestak tools find site-config via:
 1. `$HOMESTAK_SITE_CONFIG` environment variable
 2. `../site-config/` sibling directory
 3. `/opt/homestak/site-config/` fallback
 
-### Encryption
+## Config Generation
 
-- Uses SOPS + age (same as iac-driver and tofu)
-- User must update `.sops.yaml` with their own age public key
-- Git hooks auto-encrypt on commit, auto-decrypt on checkout
-
-## Common Commands
+Run on a PVE host to bootstrap configuration:
 
 ```bash
-make setup    # Configure git hooks, show key setup instructions
-make encrypt  # Encrypt *.tfvars to *.tfvars.enc
-make decrypt  # Decrypt *.tfvars.enc to *.tfvars
-make check    # Show setup status
+make host-config   # Generate hosts/{hostname}.yaml from system info
+make node-config   # Generate nodes/{hostname}.yaml from PVE info
+
+# Force overwrite existing files
+make host-config FORCE=1
+make node-config FORCE=1
 ```
 
-## User Workflow
+`host-config` gathers: network bridges (vmbr*), ZFS pools, SSH access
+`node-config` gathers: PVE API endpoint, datastore (requires PVE installed)
 
-1. Clone this repo
-2. Generate age key (`age-keygen`)
-3. Update `.sops.yaml` with public key
-4. Copy templates to real files
-5. Fill in actual values
-6. `make encrypt`
-7. (Optional) Remove `.gitignore` rules and commit encrypted files to private fork
+## Secrets Management
+
+Only `secrets.yaml` is encrypted - all other files are non-sensitive.
+
+```bash
+make setup    # Configure git hooks, check dependencies
+make encrypt  # Encrypt secrets.yaml -> secrets.yaml.enc
+make decrypt  # Decrypt secrets.yaml.enc -> secrets.yaml
+make check    # Show setup status
+make validate # Validate YAML syntax
+```
+
+### Git Hooks
+- **pre-commit**: Auto-encrypts secrets.yaml, blocks plaintext commits
+- **post-checkout**: Auto-decrypts secrets.yaml.enc
+- **post-merge**: Delegates to post-checkout
+
+## Reference Resolution
+
+Config files use references (FK) to secrets.yaml:
+```yaml
+# nodes/father.yaml
+api_token: father  # Resolves to secrets.api_tokens.father
+```
+
+The config-loader module (tofu) or iac-driver resolves these at runtime.
 
 ## Related Repos
 
-| Repo | Relationship |
-|------|--------------|
-| iac-driver | Reads `hosts/*.tfvars` for Proxmox credentials |
-| tofu | Reads `envs/*/terraform.tfvars` for environment config |
+| Repo | Consumes |
+|------|----------|
+| iac-driver | `nodes/*.yaml` + `secrets.yaml` for host config |
+| tofu | `nodes/*.yaml` + `envs/*.yaml` + `secrets.yaml` for deployments |
+| ansible | `hosts/*.yaml` for machine configuration |
 | bootstrap | Clones and sets up site-config |
 
-## Security Notes
+## Migration from tfvars
 
-- Never commit plaintext `*.tfvars` files
-- The `.gitignore` blocks both plaintext AND encrypted by default
-- Users who want to version encrypted secrets must modify `.gitignore`
-- Pre-commit hook validates no plaintext is staged
+Old structure (v0.3.x):
+- `hosts/*.tfvars` → `hosts/*.yaml` + `nodes/*.yaml` + `secrets.yaml`
+- `envs/*/terraform.tfvars` → `envs/*.yaml` (flattened)
 
 ## License
 

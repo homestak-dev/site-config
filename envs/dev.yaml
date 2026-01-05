@@ -1,0 +1,6 @@
+# Development environment
+# Full topology definition added in Phase 5
+
+env: dev
+node: pve                 # FK -> nodes/pve.yaml (deploy-time binding)
+node_ip: "10.0.12.124"    # IP of the target node
