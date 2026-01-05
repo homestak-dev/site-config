@@ -5,10 +5,10 @@ Site-specific configuration for [homestak](https://github.com/homestak-dev) depl
 ## Overview
 
 Normalized 4-entity configuration structure separating:
-- **hosts/** - Physical machines (Ansible)
-- **nodes/** - PVE instances (Tofu API access)
-- **vms/** - VM templates (future)
-- **envs/** - Deployment topologies
+- **hosts/** - Physical machines (SSH access, storage, network)
+- **nodes/** - PVE instances (API access)
+- **vms/** - VM templates (Phase 5)
+- **envs/** - Deployment topology templates (node-agnostic)
 
 All secrets are centralized in a single encrypted `secrets.yaml` file.
 
@@ -26,15 +26,10 @@ make setup
 make host-config    # → hosts/{hostname}.yaml
 make node-config    # → nodes/{hostname}.yaml
 
-# Or create configuration manually
-cp hosts/example.yaml.tpl hosts/mypve.yaml
-cp nodes/example.yaml.tpl nodes/mypve.yaml
-cp envs/example.yaml.tpl envs/dev.yaml
-
 # Create secrets.yaml with your values
 cat > secrets.yaml << 'EOF'
 api_tokens:
-  mypve: "root@pam!tofu=YOUR-TOKEN-HERE"
+  pve: "root@pam!tofu=YOUR-TOKEN-HERE"
 
 passwords:
   vm_root: "$6$YOUR-HASH-HERE"
@@ -54,23 +49,74 @@ site-config/
 ├── site.yaml              # Non-sensitive defaults (timezone, datastore)
 ├── secrets.yaml           # ALL secrets (encrypted with SOPS)
 ├── hosts/                 # Physical machines
-│   └── mypve.yaml         # SSH access, (future: network, storage)
+│   └── {name}.yaml        # SSH access (Phase 4: network, storage)
 ├── nodes/                 # PVE instances
-│   └── mypve.yaml         # API endpoint, token ref, datastore
-└── envs/                  # Deployment configs
-    └── dev.yaml           # Node reference, env-specific settings
+│   └── {name}.yaml        # API endpoint, token ref, IP, datastore
+├── vms/                   # VM templates (Phase 5)
+│   └── {name}.yaml        # (future)
+└── envs/                  # Deployment topology templates (node-agnostic)
+    └── {name}.yaml        # Host specified at deploy time
 ```
 
-## Entity Relationships
+## Schema
 
+Primary keys are derived from filenames (e.g., `nodes/pve.yaml` → `pve`).
+Foreign keys (FK) are explicit references between entities.
+
+### site.yaml
+```yaml
+defaults:
+  timezone: America/Denver
+  domain: local
+  datastore: local-zfs
+  ssh_user: root
 ```
-secrets.yaml ─────┐
-                  │ (token refs)
-site.yaml ────────┼───> nodes/*.yaml ◄──── envs/*.yaml
-                  │          │
-                  │          │ FK: host
-                  │          ▼
-                  └───> hosts/*.yaml
+
+### secrets.yaml
+```yaml
+api_tokens:
+  pve: "root@pam!tofu=..."
+passwords:
+  vm_root: "$6$..."
+ssh_keys:
+  admin: "ssh-rsa ..."
+```
+
+### hosts/{name}.yaml
+```yaml
+# Primary key derived from filename: pve.yaml -> pve
+access:
+  ssh_user: root
+  authorized_keys:
+    - admin                       # FK -> secrets.ssh_keys.admin
+```
+
+### nodes/{name}.yaml
+```yaml
+# Primary key derived from filename: pve.yaml -> pve
+host: pve                         # FK -> hosts/pve.yaml
+api_endpoint: "https://localhost:8006"
+api_token: pve                    # FK -> secrets.api_tokens.pve
+ip: "10.0.0.1"                    # Node IP for SSH access
+```
+
+### envs/{name}.yaml
+```yaml
+# Primary key derived from filename: dev.yaml -> dev
+# Node-agnostic template - target host specified at deploy time
+---
+{}
+# Phase 5: VM topology definition
+```
+
+## Deploy Pattern
+
+Envs are node-agnostic templates. Use iac-driver to deploy:
+
+```bash
+cd iac-driver
+./run.sh --scenario simple-vm-roundtrip --host pve      # Deploy to pve
+./run.sh --scenario simple-vm-roundtrip --host other    # Deploy to different host
 ```
 
 ## Encryption
@@ -82,12 +128,6 @@ Only `secrets.yaml` is encrypted - all other config is non-sensitive.
 1. Install dependencies:
    ```bash
    sudo make install-deps
-   ```
-
-   Or manually:
-   ```bash
-   apt install age
-   # Install sops from https://github.com/getsops/sops/releases
    ```
 
 2. Generate age key:
@@ -129,43 +169,6 @@ Tools find site-config via:
 1. `$HOMESTAK_SITE_CONFIG` environment variable
 2. `../site-config/` sibling directory
 3. `/opt/homestak/site-config/` (bootstrap default)
-
-## Entity Files
-
-### site.yaml
-```yaml
-defaults:
-  timezone: America/Denver
-  domain: local
-  datastore: local-zfs
-  ssh_user: root
-```
-
-### secrets.yaml
-```yaml
-api_tokens:
-  mypve: "root@pam!tofu=..."
-passwords:
-  vm_root: "$6$..."
-ssh_keys:
-  admin: "ssh-rsa ..."
-```
-
-### nodes/mypve.yaml
-```yaml
-node: mypve
-host: mypve
-api_endpoint: "https://mypve.local:8006"
-api_token: mypve      # References secrets.api_tokens.mypve
-datastore: local-zfs
-```
-
-### envs/dev.yaml
-```yaml
-env: dev
-node: mypve           # References nodes/mypve.yaml
-node_ip: "10.0.0.100"
-```
 
 ## Related Repos
 

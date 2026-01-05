@@ -18,11 +18,15 @@ Site-specific configuration for homestak deployments using a normalized 4-entity
        │ FK: host                          │ FK: vm
        ▼                                   ▼
 ┌─────────────┐                     ┌─────────────┐
-│   nodes/    │◄────── FK: node ────│   envs/     │
-│  (PVE API)  │      (deploy-time)  │ (topology)  │
+│   nodes/    │◄── --host=X ───────│   envs/     │
+│  (PVE API)  │    (deploy-time)   │ (templates) │
 │    Tofu     │                     │    Tofu     │
 └─────────────┘                     └─────────────┘
 ```
+
+**Note:** Primary keys are derived from filenames (e.g., `hosts/pve.yaml` → identifier is `pve`).
+Envs are node-agnostic templates; the target host is specified at deploy time via `run.sh --host`.
+Foreign keys (FK) are explicit references between entities.
 
 ## Structure
 
@@ -31,17 +35,15 @@ site-config/
 ├── site.yaml              # Non-sensitive site-wide defaults
 ├── secrets.yaml           # ALL sensitive values (SOPS encrypted)
 ├── secrets.yaml.enc       # Encrypted version (committed to private forks)
-├── hosts/                 # Physical machines (Ansible domain)
-│   ├── father.yaml        # Network, storage, SSH access
-│   └── mother.yaml
-├── nodes/                 # PVE instances (Tofu API access)
-│   ├── father.yaml        # api_endpoint, api_token ref, datastore
-│   ├── mother.yaml
-│   └── pve-deb.yaml       # Nested PVE (parent_node reference)
+├── hosts/                 # Physical machines
+│   └── {name}.yaml        # SSH access (Phase 4: network, storage)
+├── nodes/                 # PVE instances
+│   ├── pve.yaml           # Generic example (localhost:8006)
+│   └── nested-pve.yaml    # Nested PVE (parent_node reference)
 ├── vms/                   # VM templates (Phase 5)
 │   └── (future)
-└── envs/                  # Deployment topologies
-    ├── dev.yaml           # node reference, env-specific config
+└── envs/                  # Deployment topology templates (node-agnostic)
+    ├── dev.yaml           # env-specific config, node at deploy time
     ├── test.yaml
     └── k8s.yaml
 ```
@@ -62,26 +64,26 @@ ALL sensitive values in one file (encrypted):
 - `ssh_keys.{user}` - SSH public keys
 
 ### hosts/{name}.yaml
-Physical machine configuration (Ansible consumes):
-- `host` - Machine identifier
+Physical machine configuration for SSH access and host management.
+Primary key derived from filename (e.g., `pve.yaml` → `pve`).
 - `access.ssh_user` - SSH username
-- `access.authorized_keys` - References to secrets.ssh_keys
+- `access.authorized_keys` - References to secrets.ssh_keys (FK)
 - (Phase 4: network, storage, system config)
 
 ### nodes/{name}.yaml
-PVE instance configuration (Tofu consumes):
-- `node` - PVE node identifier
+PVE instance configuration for API access.
+Primary key derived from filename (e.g., `pve.yaml` → `pve`).
 - `host` - FK to hosts/ (physical machine)
-- `parent_node` - FK to nodes/ (for nested PVE)
+- `parent_node` - FK to nodes/ (for nested PVE, instead of host)
 - `api_endpoint` - Proxmox API URL
-- `api_token` - Reference to secrets.api_tokens
-- `datastore` - Default storage
+- `api_token` - Reference to secrets.api_tokens (FK)
+- `datastore` - Default storage (optional, falls back to site.yaml)
+- `ip` - Node IP for SSH access
 
 ### envs/{name}.yaml
-Deployment configuration (Tofu consumes):
-- `env` - Environment identifier
-- `node` - FK to nodes/ (deployment target)
-- `node_ip` - Target node IP (optional)
+Deployment topology template defining VM layouts.
+Primary key derived from filename (e.g., `dev.yaml` → `dev`).
+Node-agnostic: target host specified at deploy time via `run.sh --host`.
 - (Phase 5: VM topology, network config)
 
 ## Discovery Mechanism
@@ -138,19 +140,19 @@ make validate # Validate YAML syntax
 
 Config files use references (FK) to secrets.yaml:
 ```yaml
-# nodes/father.yaml
-api_token: father  # Resolves to secrets.api_tokens.father
+# nodes/pve.yaml
+api_token: pve  # Resolves to secrets.api_tokens.pve
 ```
 
 The config-loader module (tofu) or iac-driver resolves these at runtime.
 
 ## Related Repos
 
-| Repo | Consumes |
-|------|----------|
-| iac-driver | `nodes/*.yaml` + `secrets.yaml` for host config |
-| tofu | `nodes/*.yaml` + `envs/*.yaml` + `secrets.yaml` for deployments |
-| ansible | `hosts/*.yaml` for machine configuration |
+| Repo | Uses |
+|------|------|
+| iac-driver | `nodes/*.yaml` + `secrets.yaml` for orchestration |
+| tofu | `nodes/*.yaml` + `envs/*.yaml` + `secrets.yaml` for provisioning |
+| ansible | `hosts/*.yaml` for host configuration |
 | bootstrap | Clones and sets up site-config |
 
 ## Migration from tfvars

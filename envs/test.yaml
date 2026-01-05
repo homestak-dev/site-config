@@ -1,6 +1,6 @@
-# Test environment
+# Test environment (node-agnostic template)
+# Primary key derived from filename: test.yaml -> test
+# Node specified at deploy time via: run.sh --host <name>
 # Full topology definition added in Phase 5
-
-env: test
-node: pve                 # FK -> nodes/pve.yaml (deploy-time binding)
-node_ip: "10.0.12.124"    # IP of the target node
+---
+{}

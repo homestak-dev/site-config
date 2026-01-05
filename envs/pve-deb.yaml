@@ -1,5 +1,0 @@
-# PVE-Deb environment (nested PVE for E2E testing)
-# Full topology definition added in Phase 5
-
-env: pve-deb
-node: pve-deb             # FK -> nodes/pve-deb.yaml (nested PVE)

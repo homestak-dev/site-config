@@ -1,7 +1,6 @@
 # Physical host: pve (generic/alias)
+# Primary key derived from filename: pve.yaml -> pve
 # Rich config (network, storage) added in Phase 4
-
-host: pve
 
 access:
   ssh_user: root
