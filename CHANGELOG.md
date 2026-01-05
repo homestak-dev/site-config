@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Phase 5: VM Templates
+
+- Add `vms/` entity for declarative VM definitions
+- Add `vms/presets/` with size presets: xsmall, small, medium, large, xlarge
+- Add `vms/nested-pve.yaml` and `vms/test.yaml` templates
+- Add `vmid_base` and `vms[]` fields to envs/*.yaml
+- Template inheritance: preset → template → instance overrides
+
 ### Schema Normalization
 
 - **Breaking:** Primary keys now derived from filename (removed redundant `host:`, `node:`, `env:` fields)

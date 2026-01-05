@@ -40,8 +40,10 @@ site-config/
 ├── nodes/                 # PVE instances
 │   ├── pve.yaml           # Generic example (localhost:8006)
 │   └── nested-pve.yaml    # Nested PVE (parent_node reference)
-├── vms/                   # VM templates (Phase 5)
-│   └── (future)
+├── vms/                   # VM templates
+│   ├── presets/           # Size presets (small, medium, large)
+│   │   └── {size}.yaml
+│   └── {name}.yaml        # Custom templates
 └── envs/                  # Deployment topology templates (node-agnostic)
     ├── dev.yaml           # env-specific config, node at deploy time
     ├── test.yaml
@@ -80,11 +82,39 @@ Primary key derived from filename (e.g., `pve.yaml` → `pve`).
 - `datastore` - Default storage (optional, falls back to site.yaml)
 - `ip` - Node IP for SSH access
 
+### vms/presets/{size}.yaml
+Size presets for VM resource allocation.
+Primary key derived from filename (e.g., `small.yaml` → `small`).
+- `cores` - Number of CPU cores
+- `memory` - RAM in MB
+- `disk` - Disk size in GB
+
+Available presets: `xsmall` (1c/1GB/8GB), `small` (2c/2GB/8GB), `medium` (2c/4GB/16GB), `large` (4c/8GB/32GB), `xlarge` (8c/16GB/64GB)
+
+### vms/{name}.yaml
+VM template defining base configuration.
+Primary key derived from filename (e.g., `nested-pve.yaml` → `nested-pve`).
+- `image` - Base image name (FK to packer image)
+- `preset` - FK to vms/presets/ (optional, for resource inheritance)
+- `cores` - CPU cores (overrides preset)
+- `memory` - RAM in MB (overrides preset)
+- `disk` - Disk size in GB (overrides preset)
+- `bridge` - Network bridge (optional, defaults from site.yaml)
+- `ip` - IP address or "dhcp" (optional)
+- `packages` - Cloud-init packages (optional)
+
+**Merge order:** preset → template → instance overrides
+
 ### envs/{name}.yaml
 Deployment topology template defining VM layouts.
 Primary key derived from filename (e.g., `dev.yaml` → `dev`).
 Node-agnostic: target host specified at deploy time via `run.sh --host`.
-- (Phase 5: VM topology, network config)
+- `vmid_base` - Base VM ID for auto-allocation (omit for PVE auto-assign)
+- `vms[]` - List of VM instances:
+  - `name` - VM hostname
+  - `template` - FK to vms/ template
+  - `vmid` - Explicit VM ID (overrides vmid_base + index)
+  - (any template field can be overridden per-instance)
 
 ## Discovery Mechanism
 
@@ -144,14 +174,14 @@ Config files use references (FK) to secrets.yaml:
 api_token: pve  # Resolves to secrets.api_tokens.pve
 ```
 
-The config-loader module (tofu) or iac-driver resolves these at runtime.
+iac-driver's ConfigResolver resolves all references at runtime and generates flat tfvars for tofu.
 
 ## Related Repos
 
 | Repo | Uses |
 |------|------|
-| iac-driver | `nodes/*.yaml` + `secrets.yaml` for orchestration |
-| tofu | `nodes/*.yaml` + `envs/*.yaml` + `secrets.yaml` for provisioning |
+| iac-driver | All entities - resolves config and generates tfvars for tofu |
+| tofu | Receives flat tfvars from iac-driver (no direct site-config access) |
 | ansible | `hosts/*.yaml` for host configuration |
 | bootstrap | Clones and sets up site-config |
 

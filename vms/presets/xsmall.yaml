@@ -1,0 +1,5 @@
+# Extra Small VM preset
+# 1 core, 1GB RAM, 8GB disk
+cores: 1
+memory: 1024
+disk: 8
