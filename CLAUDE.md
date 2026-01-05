@@ -91,6 +91,22 @@ Other homestak tools find site-config via:
 2. `../site-config/` sibling directory
 3. `/opt/homestak/site-config/` fallback
 
+## Config Generation
+
+Run on a PVE host to bootstrap configuration:
+
+```bash
+make host-config   # Generate hosts/{hostname}.yaml from system info
+make node-config   # Generate nodes/{hostname}.yaml from PVE info
+
+# Force overwrite existing files
+make host-config FORCE=1
+make node-config FORCE=1
+```
+
+`host-config` gathers: network bridges (vmbr*), ZFS pools, SSH access
+`node-config` gathers: PVE API endpoint, datastore (requires PVE installed)
+
 ## Secrets Management
 
 Only `secrets.yaml` is encrypted - all other files are non-sensitive.

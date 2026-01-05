@@ -8,22 +8,26 @@
 #   nodes/*.yaml     - PVE instance config
 #   envs/*.yaml      - Deployment config
 
-.PHONY: help setup decrypt encrypt clean check validate
+.PHONY: help setup decrypt encrypt clean check validate host-config node-config
 
 help:
 	@echo "site-config - Site-specific configuration management"
 	@echo ""
 	@echo "Setup:"
-	@echo "  make setup    - Configure git hooks and check dependencies"
+	@echo "  make setup       - Configure git hooks and check dependencies"
+	@echo ""
+	@echo "Config Generation (run on target host):"
+	@echo "  make host-config - Generate hosts/{hostname}.yaml from system info"
+	@echo "  make node-config - Generate nodes/{hostname}.yaml from PVE info"
 	@echo ""
 	@echo "Secrets Management:"
-	@echo "  make decrypt  - Decrypt secrets.yaml.enc to secrets.yaml"
-	@echo "  make encrypt  - Encrypt secrets.yaml to secrets.yaml.enc"
-	@echo "  make clean    - Remove plaintext secrets.yaml (keeps .enc)"
-	@echo "  make check    - Verify encryption setup"
+	@echo "  make decrypt     - Decrypt secrets.yaml.enc to secrets.yaml"
+	@echo "  make encrypt     - Encrypt secrets.yaml to secrets.yaml.enc"
+	@echo "  make clean       - Remove plaintext secrets.yaml (keeps .enc)"
+	@echo "  make check       - Verify encryption setup"
 	@echo ""
 	@echo "Validation:"
-	@echo "  make validate - Validate YAML syntax (optional)"
+	@echo "  make validate    - Validate YAML syntax (optional)"
 	@echo ""
 	@echo "Prerequisites:"
 	@echo "  - age:  apt install age"
@@ -128,3 +132,25 @@ validate:
 		python3 -c "import yaml; yaml.safe_load(open('secrets.yaml'))" 2>/dev/null && echo "  secrets.yaml: OK" || echo "  secrets.yaml: INVALID"; \
 	fi
 	@echo "Done."
+
+host-config:
+	@HOSTNAME=$$(hostname -s); \
+	OUTPUT="hosts/$$HOSTNAME.yaml"; \
+	if [ -f "$$OUTPUT" ] && [ "$(FORCE)" != "1" ]; then \
+		echo "ERROR: $$OUTPUT already exists. Use 'make host-config FORCE=1' to overwrite." >&2; \
+		exit 1; \
+	fi; \
+	mkdir -p hosts && \
+	FORCE=1 ./scripts/host-config.sh > "$$OUTPUT" && \
+	echo "Generated: $$OUTPUT"
+
+node-config:
+	@HOSTNAME=$$(hostname -s); \
+	OUTPUT="nodes/$$HOSTNAME.yaml"; \
+	if [ -f "$$OUTPUT" ] && [ "$(FORCE)" != "1" ]; then \
+		echo "ERROR: $$OUTPUT already exists. Use 'make node-config FORCE=1' to overwrite." >&2; \
+		exit 1; \
+	fi; \
+	mkdir -p nodes && \
+	FORCE=1 ./scripts/node-config.sh > "$$OUTPUT" && \
+	echo "Generated: $$OUTPUT"

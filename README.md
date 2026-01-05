@@ -22,7 +22,11 @@ cd site-config
 # Setup encryption
 make setup
 
-# Create your configuration
+# On your PVE host: auto-generate config from system inventory
+make host-config    # → hosts/{hostname}.yaml
+make node-config    # → nodes/{hostname}.yaml
+
+# Or create configuration manually
 cp hosts/example.yaml.tpl hosts/mypve.yaml
 cp nodes/example.yaml.tpl nodes/mypve.yaml
 cp envs/example.yaml.tpl envs/dev.yaml
@@ -100,11 +104,18 @@ Only `secrets.yaml` is encrypted - all other config is non-sensitive.
 | Command | Description |
 |---------|-------------|
 | `make setup` | Configure git hooks, check dependencies |
+| `make host-config` | Generate hosts/{hostname}.yaml from system info |
+| `make node-config` | Generate nodes/{hostname}.yaml from PVE info |
 | `make encrypt` | Encrypt secrets.yaml |
 | `make decrypt` | Decrypt secrets.yaml.enc |
 | `make clean` | Remove plaintext secrets.yaml |
 | `make check` | Show setup status |
 | `make validate` | Validate YAML syntax |
+
+Use `FORCE=1` to overwrite existing config files:
+```bash
+make host-config FORCE=1
+```
 
 ## Discovery
 

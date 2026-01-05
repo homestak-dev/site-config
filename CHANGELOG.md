@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.2.0 - 2026-01-04
+
+### Features
+
+- Add `make host-config` to auto-generate hosts/*.yaml from system inventory
+- Add `make node-config` to auto-generate nodes/*.yaml from PVE info
+- Gathers network bridges, ZFS pools, API endpoints, datastores
+- Won't overwrite existing files (use `FORCE=1` to override)
+
 ## v0.1.0 - 2026-01-04
 
 Initial release - site-specific configuration template.
