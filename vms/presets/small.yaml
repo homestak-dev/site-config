@@ -1,5 +1,5 @@
 # Small VM preset
-# 1 core, 2GB RAM, 20GB disk
-cores: 1
-memory: 2048
-disk: 20
+# 2 cores, 1GB RAM, 8GB disk
+cores: 2
+memory: 1024
+disk: 8
