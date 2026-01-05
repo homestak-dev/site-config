@@ -74,16 +74,16 @@ Primary key derived from filename (e.g., `pve.yaml` → `pve`).
 PVE instance configuration (Tofu consumes).
 Primary key derived from filename (e.g., `pve.yaml` → `pve`).
 - `host` - FK to hosts/ (physical machine)
-- `parent_node` - FK to nodes/ (for nested PVE)
+- `parent_node` - FK to nodes/ (for nested PVE, instead of host)
 - `api_endpoint` - Proxmox API URL
 - `api_token` - Reference to secrets.api_tokens (FK)
-- `datastore` - Default storage
+- `datastore` - Default storage (optional, falls back to site.yaml)
+- `ip` - Node IP for SSH access
 
 ### envs/{name}.yaml
 Deployment topology template (Tofu consumes).
 Primary key derived from filename (e.g., `dev.yaml` → `dev`).
 Node-agnostic: target node specified at deploy time via `-var="node=..."`.
-- `node_ip` - Target node IP (optional)
 - (Phase 5: VM topology, network config)
 
 ## Discovery Mechanism

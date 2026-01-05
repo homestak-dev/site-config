@@ -2,5 +2,3 @@
 # Primary key derived from filename: test.yaml -> test
 # Node specified at deploy time via: tofu apply -var="node=<name>"
 # Full topology definition added in Phase 5
-
-node_ip: "10.0.12.124"    # IP of the target node
