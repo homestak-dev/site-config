@@ -35,7 +35,8 @@ passwords:
   vm_root: "$6$YOUR-HASH-HERE"
 
 ssh_keys:
-  admin: "ssh-rsa YOUR-KEY-HERE"
+  # Key identifiers use user@host convention
+  admin@workstation: "ssh-rsa YOUR-KEY-HERE admin@workstation"
 EOF
 
 # Encrypt secrets
@@ -80,7 +81,8 @@ api_tokens:
 passwords:
   vm_root: "$6$..."
 ssh_keys:
-  admin: "ssh-rsa ..."
+  # Key identifiers use user@host convention (matches key comment)
+  admin@workstation: "ssh-rsa ... admin@workstation"
 ```
 
 ### hosts/{name}.yaml
@@ -89,7 +91,7 @@ ssh_keys:
 access:
   ssh_user: root
   authorized_keys:
-    - admin                       # FK -> secrets.ssh_keys.admin
+    - admin@workstation           # FK -> secrets.ssh_keys["admin@workstation"]
 ```
 
 ### nodes/{name}.yaml

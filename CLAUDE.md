@@ -63,13 +63,13 @@ Non-sensitive defaults inherited by all entities:
 ALL sensitive values in one file (encrypted):
 - `api_tokens.{node}` - Proxmox API tokens
 - `passwords.vm_root` - VM root password hash
-- `ssh_keys.{user}` - SSH public keys
+- `ssh_keys.{user@host}` - SSH public keys (identifier matches key comment)
 
 ### hosts/{name}.yaml
 Physical machine configuration for SSH access and host management.
 Primary key derived from filename (e.g., `pve.yaml` → `pve`).
 - `access.ssh_user` - SSH username
-- `access.authorized_keys` - References to secrets.ssh_keys (FK)
+- `access.authorized_keys` - References to secrets.ssh_keys by user@host identifier (FK)
 - (Phase 4: network, storage, system config)
 
 ### nodes/{name}.yaml

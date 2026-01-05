@@ -10,6 +10,12 @@
 - Add `vmid_base` and `vms[]` fields to envs/*.yaml
 - Template inheritance: preset → template → instance overrides
 
+### Conventions
+
+- Adopt `user@host` convention for ssh_keys identifiers (closes #11)
+  - Self-documenting: identifier matches key comment
+  - Clear provenance: shows which machine the key is from
+
 ### Schema Normalization
 
 - **Breaking:** Primary keys now derived from filename (removed redundant `host:`, `node:`, `env:` fields)
