@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.5.0-rc1 - 2026-01-04
+
+Consolidated pre-release with full tooling.
+
+### Highlights
+
+- make install-deps for automated setup
+- make host-config / node-config for system inventory
+- SOPS + age encryption for secrets
+
+### Changes
+
+- Documentation improvements
+
 ## v0.3.0 - 2026-01-04
 
 ### Features
