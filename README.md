@@ -103,7 +103,8 @@ ip: "10.0.0.1"                    # Node IP for SSH access
 
 ### vms/presets/{size}.yaml
 ```yaml
-# Size preset: xsmall, small, medium, large, xlarge
+# Presets: xsmall (1c/1G/8G), small (2c/2G/8G), medium (2c/4G/16G),
+#          large (4c/8G/32G), xlarge (8c/16G/64G)
 cores: 2
 memory: 4096    # MB
 disk: 16        # GB
