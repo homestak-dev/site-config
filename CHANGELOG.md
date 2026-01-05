@@ -13,11 +13,10 @@
 
 ### Deploy Pattern
 
-Envs no longer specify target node. Node is now required at deploy time:
+Envs no longer specify target node. Host is specified at deploy time via iac-driver:
 
 ```bash
-tofu apply -var="node=pve"      # Deploy to pve
-tofu apply -var="node=other"    # Deploy same env to different node
+./run.sh --scenario simple-vm-roundtrip --host pve
 ```
 
 ## v0.5.0-rc1 - 2026-01-04

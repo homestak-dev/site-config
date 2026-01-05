@@ -92,7 +92,7 @@ ip: "10.0.0.1"                    # Node IP for SSH access
 ### envs/{name}.yaml
 ```yaml
 # Primary key derived from filename: dev.yaml -> dev
-# Node-agnostic template - deploy with: tofu apply -var="node=pve"
+# Node-agnostic template - target host specified at deploy time
 ---
 {}
 # Phase 5: VM topology definition
@@ -100,11 +100,12 @@ ip: "10.0.0.1"                    # Node IP for SSH access
 
 ## Deploy Pattern
 
-Envs are node-agnostic templates. Specify the target node at deploy time:
+Envs are node-agnostic templates. Use iac-driver to deploy:
 
 ```bash
-tofu apply -var="node=pve"      # Deploy to pve
-tofu apply -var="node=other"    # Deploy same env to different node
+cd iac-driver
+./run.sh --scenario simple-vm-roundtrip --host pve      # Deploy to pve
+./run.sh --scenario simple-vm-roundtrip --host other    # Deploy to different host
 ```
 
 ## Encryption

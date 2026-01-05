@@ -1,6 +1,6 @@
 # Nested PVE environment (for E2E testing)
 # Primary key derived from filename: nested-pve.yaml -> nested-pve
-# Node specified at deploy time via: tofu apply -var="node=<name>"
+# Node specified at deploy time via: run.sh --host <name>
 # Full topology definition added in Phase 5
 ---
 {}
