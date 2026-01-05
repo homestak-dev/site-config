@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.3.0 - 2026-01-04
+
+### Features
+
+- Add `make install-deps` to install age and sops automatically
+  - age via apt
+  - sops v3.11.0 via .deb from GitHub releases
+  - Idempotent (skips if already installed)
+
 ## v0.2.0 - 2026-01-04
 
 ### Features

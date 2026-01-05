@@ -91,6 +91,16 @@ Other homestak tools find site-config via:
 2. `../site-config/` sibling directory
 3. `/opt/homestak/site-config/` fallback
 
+## Dependency Installation
+
+```bash
+sudo make install-deps  # Install age and sops
+```
+
+Installs:
+- `age` via apt
+- `sops` v3.11.0 via .deb from GitHub releases
+
 ## Config Generation
 
 Run on a PVE host to bootstrap configuration:
