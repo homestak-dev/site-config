@@ -24,7 +24,7 @@ Site-specific configuration for homestak deployments using a normalized 4-entity
 └─────────────┘                     └─────────────┘
 ```
 
-**Note:** Primary keys are derived from filenames (e.g., `hosts/father.yaml` → identifier is `father`).
+**Note:** Primary keys are derived from filenames (e.g., `hosts/pve.yaml` → identifier is `pve`).
 Envs are node-agnostic templates; the target node is specified at deploy time via `-var="node=..."`.
 Foreign keys (FK) are explicit references between entities.
 
@@ -36,11 +36,9 @@ site-config/
 ├── secrets.yaml           # ALL sensitive values (SOPS encrypted)
 ├── secrets.yaml.enc       # Encrypted version (committed to private forks)
 ├── hosts/                 # Physical machines (Ansible domain)
-│   ├── father.yaml        # Network, storage, SSH access
-│   └── mother.yaml
+│   └── {name}.yaml        # SSH access (Phase 4: network, storage)
 ├── nodes/                 # PVE instances (Tofu API access)
-│   ├── father.yaml        # api_endpoint, api_token ref, datastore
-│   ├── mother.yaml
+│   ├── pve.yaml           # Generic example (localhost:8006)
 │   └── pve-deb.yaml       # Nested PVE (parent_node reference)
 ├── vms/                   # VM templates (Phase 5)
 │   └── (future)
@@ -67,7 +65,7 @@ ALL sensitive values in one file (encrypted):
 
 ### hosts/{name}.yaml
 Physical machine configuration (Ansible consumes).
-Primary key derived from filename (e.g., `father.yaml` → `father`).
+Primary key derived from filename (e.g., `pve.yaml` → `pve`).
 - `access.ssh_user` - SSH username
 - `access.authorized_keys` - References to secrets.ssh_keys (FK)
 - (Phase 4: network, storage, system config)
@@ -142,8 +140,8 @@ make validate # Validate YAML syntax
 
 Config files use references (FK) to secrets.yaml:
 ```yaml
-# nodes/father.yaml
-api_token: father  # Resolves to secrets.api_tokens.father
+# nodes/pve.yaml
+api_token: pve  # Resolves to secrets.api_tokens.pve
 ```
 
 The config-loader module (tofu) or iac-driver resolves these at runtime.
