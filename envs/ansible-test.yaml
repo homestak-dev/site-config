@@ -1,0 +1,11 @@
+# Ansible community role testing environment
+# Purpose: Validate lae.proxmox, DebOps, geerlingguy roles
+# Node specified at deploy time via: run.sh --host <name>
+---
+vmid_base: 10100
+
+vms:
+  - name: deb12-test
+    template: test
+  - name: deb13-test
+    template: test13
