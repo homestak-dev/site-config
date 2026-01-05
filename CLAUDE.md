@@ -39,7 +39,7 @@ site-config/
 │   └── {name}.yaml        # SSH access (Phase 4: network, storage)
 ├── nodes/                 # PVE instances (Tofu API access)
 │   ├── pve.yaml           # Generic example (localhost:8006)
-│   └── pve-deb.yaml       # Nested PVE (parent_node reference)
+│   └── nested-pve.yaml    # Nested PVE (parent_node reference)
 ├── vms/                   # VM templates (Phase 5)
 │   └── (future)
 └── envs/                  # Deployment topology templates (node-agnostic)
