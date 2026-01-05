@@ -2,3 +2,5 @@
 # Primary key derived from filename: nested-pve.yaml -> nested-pve
 # Node specified at deploy time via: tofu apply -var="node=<name>"
 # Full topology definition added in Phase 5
+---
+{}
