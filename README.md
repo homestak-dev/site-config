@@ -53,7 +53,7 @@ site-config/
 ├── nodes/                 # PVE instances
 │   └── {name}.yaml        # API endpoint, token ref, IP, datastore
 ├── vms/                   # VM templates
-│   ├── presets/           # Size presets (tiny, small, medium, large, xlarge)
+│   ├── presets/           # Size presets (xsmall, small, medium, large, xlarge)
 │   └── {name}.yaml        # Custom templates (image, preset, overrides)
 └── envs/                  # Deployment topology templates (node-agnostic)
     └── {name}.yaml        # Host specified at deploy time
@@ -103,7 +103,7 @@ ip: "10.0.0.1"                    # Node IP for SSH access
 
 ### vms/presets/{size}.yaml
 ```yaml
-# Size preset: tiny, small, medium, large, xlarge
+# Size preset: xsmall, small, medium, large, xlarge
 cores: 2
 memory: 4096    # MB
 disk: 16        # GB
