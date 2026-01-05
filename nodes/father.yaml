@@ -1,6 +1,0 @@
-# PVE instance on father (physical host)
-# Primary key derived from filename: father.yaml -> father
-host: father              # FK -> hosts/father.yaml
-api_endpoint: "https://father.core:8006"
-api_token: father         # FK -> secrets.api_tokens.father
-datastore: local-zfs

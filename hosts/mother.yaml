@@ -1,8 +1,0 @@
-# Physical host: mother
-# Primary key derived from filename: mother.yaml -> mother
-# Rich config (network, storage) added in Phase 4
-
-access:
-  ssh_user: root
-  authorized_keys:
-    - jderose           # FK -> secrets.ssh_keys.jderose

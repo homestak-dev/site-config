@@ -1,6 +1,0 @@
-# PVE instance on mother (physical host)
-# Primary key derived from filename: mother.yaml -> mother
-host: mother              # FK -> hosts/mother.yaml
-api_endpoint: "https://mother.core:8006"
-api_token: mother         # FK -> secrets.api_tokens.mother
-datastore: local-zfs
