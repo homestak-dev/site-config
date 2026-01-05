@@ -2,3 +2,4 @@
 # Simple Debian 12 VM using small preset
 image: debian-12
 preset: small
+disk: 10  # Override: image virtual size is 10GB
