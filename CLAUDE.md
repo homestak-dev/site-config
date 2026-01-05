@@ -18,14 +18,14 @@ Site-specific configuration for homestak deployments using a normalized 4-entity
        │ FK: host                          │ FK: vm
        ▼                                   ▼
 ┌─────────────┐                     ┌─────────────┐
-│   nodes/    │◄── -var="node=X" ──│   envs/     │
+│   nodes/    │◄── --host=X ───────│   envs/     │
 │  (PVE API)  │    (deploy-time)   │ (templates) │
 │    Tofu     │                     │    Tofu     │
 └─────────────┘                     └─────────────┘
 ```
 
 **Note:** Primary keys are derived from filenames (e.g., `hosts/pve.yaml` → identifier is `pve`).
-Envs are node-agnostic templates; the target node is specified at deploy time via `-var="node=..."`.
+Envs are node-agnostic templates; the target host is specified at deploy time via `run.sh --host`.
 Foreign keys (FK) are explicit references between entities.
 
 ## Structure
@@ -64,14 +64,14 @@ ALL sensitive values in one file (encrypted):
 - `ssh_keys.{user}` - SSH public keys
 
 ### hosts/{name}.yaml
-Physical machine configuration (Ansible consumes).
+Physical machine configuration for SSH access and host management.
 Primary key derived from filename (e.g., `pve.yaml` → `pve`).
 - `access.ssh_user` - SSH username
 - `access.authorized_keys` - References to secrets.ssh_keys (FK)
 - (Phase 4: network, storage, system config)
 
 ### nodes/{name}.yaml
-PVE instance configuration (Tofu consumes).
+PVE instance configuration for API access.
 Primary key derived from filename (e.g., `pve.yaml` → `pve`).
 - `host` - FK to hosts/ (physical machine)
 - `parent_node` - FK to nodes/ (for nested PVE, instead of host)
@@ -81,9 +81,9 @@ Primary key derived from filename (e.g., `pve.yaml` → `pve`).
 - `ip` - Node IP for SSH access
 
 ### envs/{name}.yaml
-Deployment topology template (Tofu consumes).
+Deployment topology template defining VM layouts.
 Primary key derived from filename (e.g., `dev.yaml` → `dev`).
-Node-agnostic: target node specified at deploy time via `-var="node=..."`.
+Node-agnostic: target host specified at deploy time via `run.sh --host`.
 - (Phase 5: VM topology, network config)
 
 ## Discovery Mechanism
