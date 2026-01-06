@@ -1,6 +1,11 @@
 # Plaintext secrets (never commit)
 secrets.yaml
 
+# Site-specific node configs (generated per-deployment via make node-config)
+# Keep nested-pve.yaml tracked for E2E testing
+nodes/*.yaml
+!nodes/nested-pve.yaml
+
 # Old tfvars format (deprecated, remove after migration)
 *.tfvars
 hosts/*.tfvars
