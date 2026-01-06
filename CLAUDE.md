@@ -24,7 +24,7 @@ Site-specific configuration for homestak deployments using a normalized 4-entity
 └─────────────┘                     └─────────────┘
 ```
 
-**Note:** Primary keys are derived from filenames (e.g., `hosts/pve.yaml` → identifier is `pve`).
+**Note:** Primary keys are derived from filenames (e.g., `hosts/father.yaml` → identifier is `father`).
 Envs are node-agnostic templates; the target host is specified at deploy time via `run.sh --host`.
 Foreign keys (FK) are explicit references between entities.
 
@@ -69,7 +69,7 @@ ALL sensitive values in one file (encrypted):
 
 ### hosts/{name}.yaml
 Physical machine configuration for SSH access and host management.
-Primary key derived from filename (e.g., `pve.yaml` → `pve`).
+Primary key derived from filename (e.g., `father.yaml` → `father`).
 - `access.ssh_user` - SSH username
 - `access.authorized_keys` - References to secrets.ssh_keys by user@host identifier (FK)
 - (Phase 4: network, storage, system config)
@@ -174,8 +174,8 @@ make validate # Validate YAML syntax
 
 Config files use references (FK) to secrets.yaml:
 ```yaml
-# nodes/pve.yaml
-api_token: pve  # Resolves to secrets.api_tokens.pve
+# nodes/father.yaml
+api_token: father  # Resolves to secrets.api_tokens.father
 ```
 
 iac-driver's ConfigResolver resolves all references at runtime and generates flat tfvars for tofu.
