@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.7.0-rc1 - 2026-01-06
+
+### Features
+
+- Add `gateway` field to vms schema for static IP configurations (closes #17)
+
+### Changes
+
+- Remove generic `pve.yaml` that caused confusion with real hosts (closes #18)
+- Update CLAUDE.md examples to use `father` instead of `pve`
+
 ## v0.6.0-rc1 - 2026-01-06
 
 ### Phase 5: VM Templates
