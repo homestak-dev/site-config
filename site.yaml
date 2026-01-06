@@ -6,3 +6,5 @@ defaults:
   domain: local
   datastore: local-zfs
   ssh_user: root
+  bridge: vmbr0
+  gateway: 10.0.12.1

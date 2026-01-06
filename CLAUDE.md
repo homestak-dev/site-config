@@ -58,6 +58,8 @@ Non-sensitive defaults inherited by all entities:
 - `defaults.domain`
 - `defaults.datastore`
 - `defaults.ssh_user`
+- `defaults.bridge` - Default network bridge
+- `defaults.gateway` - Default gateway for static IPs
 
 ### secrets.yaml
 ALL sensitive values in one file (encrypted):
@@ -101,6 +103,7 @@ Primary key derived from filename (e.g., `nested-pve.yaml` → `nested-pve`).
 - `disk` - Disk size in GB (overrides preset)
 - `bridge` - Network bridge (optional, defaults from site.yaml)
 - `ip` - IP address or "dhcp" (optional)
+- `gateway` - Gateway IP for static IPs (optional, defaults from site.yaml)
 - `packages` - Cloud-init packages (optional)
 
 **Merge order:** preset → template → instance overrides
