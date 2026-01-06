@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.8.0-rc1 - 2026-01-06
+
+### Changes
+
+- Exclude site-specific node configs from git tracking (closes #14)
+  - `nodes/*.yaml` now gitignored (except `nested-pve.yaml` for E2E tests)
+  - Site-specific configs generated via `make node-config`
+- Remove deprecated tfvars entries from `.gitignore` (closes #19)
+  - Migration to YAML complete, no tfvars files remain
+- Secrets audit: all entries in `secrets.yaml` confirmed in use
+
+### Documentation
+
+- Update CLAUDE.md with git tracking conventions for node configs
+
 ## v0.7.0-rc1 - 2026-01-06
 
 ### Features
