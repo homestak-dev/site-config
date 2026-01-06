@@ -85,6 +85,8 @@ Primary key derived from filename (e.g., `father.yaml` → `father`).
 - `datastore` - Default storage (optional, falls back to site.yaml)
 - `ip` - Node IP for SSH access
 
+**Git tracking:** Site-specific node configs (e.g., `father.yaml`, `mother.yaml`) are excluded from git via `.gitignore`. Only `nested-pve.yaml` is tracked (required for E2E testing). Generate your node config with `make node-config` on each PVE host.
+
 ### vms/presets/{size}.yaml
 Size presets for VM resource allocation.
 Primary key derived from filename (e.g., `small.yaml` → `small`).
