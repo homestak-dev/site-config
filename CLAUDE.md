@@ -37,8 +37,8 @@ site-config/
 ├── secrets.yaml.enc       # Encrypted version (committed to private forks)
 ├── hosts/                 # Physical machines
 │   └── {name}.yaml        # SSH access (Phase 4: network, storage)
-├── nodes/                 # PVE instances
-│   ├── pve.yaml           # Generic example (localhost:8006)
+├── nodes/                 # PVE instances (filename must match PVE node name)
+│   ├── {nodename}.yaml    # e.g., father.yaml for node named "father"
 │   └── nested-pve.yaml    # Nested PVE (parent_node reference)
 ├── vms/                   # VM templates
 │   ├── presets/           # Size presets (small, medium, large)
@@ -76,7 +76,8 @@ Primary key derived from filename (e.g., `pve.yaml` → `pve`).
 
 ### nodes/{name}.yaml
 PVE instance configuration for API access.
-Primary key derived from filename (e.g., `pve.yaml` → `pve`).
+**Important:** Filename must match the actual PVE node name (check with `pvesh get /nodes`).
+Primary key derived from filename (e.g., `father.yaml` → `father`).
 - `host` - FK to hosts/ (physical machine)
 - `parent_node` - FK to nodes/ (for nested PVE, instead of host)
 - `api_endpoint` - Proxmox API URL
