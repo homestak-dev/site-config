@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.9 - 2026-01-07
+
+### Features
+
+- Use `debian-13-pve` image for nested PVE env (faster deployment)
+
+### Documentation
+
+- Update scenario name: `simple-vm-roundtrip` → `vm-roundtrip`
+
 ## v0.8 - 2026-01-06
 
 ### Changes
