@@ -1,4 +1,4 @@
-# Nested PVE environment (for E2E testing)
+# Nested PVE environment (for integration testing)
 # Primary key derived from filename: nested-pve.yaml -> nested-pve
 # Node specified at deploy time via: run.sh --host <name>
 ---
