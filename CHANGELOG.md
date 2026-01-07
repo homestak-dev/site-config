@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.8.0-rc1 - 2026-01-06
+## v0.8 - 2026-01-06
 
 ### Changes
 
@@ -15,7 +15,7 @@
 
 - Update CLAUDE.md with git tracking conventions for node configs
 
-## v0.7.0-rc1 - 2026-01-06
+## v0.7 - 2026-01-06
 
 ### Features
 
@@ -26,7 +26,7 @@
 - Remove generic `pve.yaml` that caused confusion with real hosts (closes #18)
 - Update CLAUDE.md examples to use `father` instead of `pve`
 
-## v0.6.0-rc1 - 2026-01-06
+## v0.6 - 2026-01-06
 
 ### Phase 5: VM Templates
 
