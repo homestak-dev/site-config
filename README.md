@@ -140,8 +140,8 @@ Envs are node-agnostic templates. Use iac-driver to deploy:
 
 ```bash
 cd iac-driver
-./run.sh --scenario simple-vm-roundtrip --host pve      # Deploy to pve
-./run.sh --scenario simple-vm-roundtrip --host other    # Deploy to different host
+./run.sh --scenario vm-roundtrip --host pve      # Deploy to pve
+./run.sh --scenario vm-roundtrip --host other    # Deploy to different host
 ```
 
 ## Encryption
