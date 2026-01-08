@@ -139,7 +139,7 @@ vms:
 Envs are node-agnostic templates. The `--env` flag selects which `envs/*.yaml` template to deploy, while `--host` determines the target Proxmox node.
 
 ```bash
-# Example assumes two Proxmox hosts: father and mother
+# Example assumes two Proxmox Virtual Environment (PVE) hosts: father and mother
 
 # Deploy dev environment to your primary host
 homestak scenario vm-constructor --host father --env dev
