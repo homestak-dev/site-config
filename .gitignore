@@ -2,7 +2,7 @@
 secrets.yaml
 
 # Site-specific node configs (generated per-deployment via make node-config)
-# Keep nested-pve.yaml tracked for E2E testing
+# Keep nested-pve.yaml tracked for integration testing
 nodes/*.yaml
 !nodes/nested-pve.yaml
 

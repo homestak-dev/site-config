@@ -47,7 +47,9 @@ site-config/
 └── envs/                  # Deployment topology templates (node-agnostic)
     ├── dev.yaml           # env-specific config, node at deploy time
     ├── test.yaml
-    └── k8s.yaml
+    ├── k8s.yaml
+    ├── ansible-test.yaml  # Ansible role validation
+    └── nested-pve.yaml    # Integration testing
 ```
 
 ## Entity Definitions
