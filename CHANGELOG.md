@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.10 - 2026-01-08
+
+### Documentation
+
+- Add third-party acknowledgments for SOPS and age
+- Improve Deploy Pattern examples with practical use cases
+- Use `homestak` CLI in examples (vs raw iac-driver commands)
+- Clarify node-agnostic env concept
+- Add caution for destructive commands (pending confirmation prompt)
+
+### Housekeeping
+
+- Update terminology: E2E → integration testing
+- Add LICENSE file (Apache 2.0)
+- Add standard repository topics
+- Enable secret scanning and Dependabot
+
 ## v0.9 - 2026-01-07
 
 ### Features
