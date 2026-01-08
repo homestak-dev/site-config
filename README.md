@@ -136,13 +136,29 @@ vms:
 
 ## Deploy Pattern
 
-Envs are node-agnostic templates. Use iac-driver to deploy:
+Envs are node-agnostic templates. The `--env` flag selects which `envs/*.yaml` template to deploy, while `--host` determines the target Proxmox node.
 
 ```bash
-cd iac-driver
-./run.sh --scenario vm-roundtrip --host pve      # Deploy to pve
-./run.sh --scenario vm-roundtrip --host other    # Deploy to different host
+# Deploy dev environment to your primary host
+homestak scenario vm-constructor --host father --env dev
+
+# Same environment on a different host (node-agnostic!)
+homestak scenario vm-constructor --host mother --env dev
+
+# Deploy a different environment (k8s cluster, etc.)
+homestak scenario vm-constructor --host father --env k8s
+
+# Tear down when done
+homestak scenario vm-destructor --host father --env dev
+
+# Quick test - deploy, verify SSH works, destroy
+homestak scenario vm-roundtrip --host father --env test
+
+# See what scenarios are available
+homestak scenario --list
 ```
+
+Define your own environments by creating `envs/{name}.yaml` (see schema above).
 
 ## Encryption
 
