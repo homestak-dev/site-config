@@ -195,6 +195,15 @@ Tools find site-config via:
 2. `../site-config/` sibling directory
 3. `/opt/homestak/site-config/` (bootstrap default)
 
+## Third-Party Acknowledgments
+
+This project relies on excellent open-source tools:
+
+| Tool | Purpose |
+|------|---------|
+| [SOPS](https://github.com/getsops/sops) | Secrets encryption with structured file support |
+| [age](https://github.com/FiloSottile/age) | Simple, modern encryption backend |
+
 ## Related Repos
 
 | Repo | Purpose |
