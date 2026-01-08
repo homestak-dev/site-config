@@ -150,7 +150,7 @@ homestak scenario vm-constructor --host mother --env dev
 # Deploy a different environment (k8s cluster, etc.)
 homestak scenario vm-constructor --host father --env k8s
 
-# Tear down when done
+# Tear down when done (caution: no confirmation prompt, destroys immediately)
 homestak scenario vm-destructor --host father --env dev
 
 # Quick test - deploy, verify SSH works, destroy
