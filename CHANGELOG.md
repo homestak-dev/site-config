@@ -1,5 +1,28 @@
 # Changelog
 
+## v0.13 - 2026-01-10
+
+### Features
+
+- Add `postures/` directory for security posture definitions
+  - `dev.yaml` - Permissive (SSH password auth, sudo nopasswd)
+  - `prod.yaml` - Hardened (no root login, fail2ban enabled)
+  - `local.yaml` - On-box execution posture
+- Extend `site.yaml` with new defaults:
+  - `packages` - Base packages for all VMs
+  - `pve_remove_subscription_nag` - Remove PVE subscription popup
+
+### Changes
+
+- Add `posture` FK to all envs (references postures/)
+- Move `datastore` from site defaults to nodes/ (now required per-node)
+- Add `hosts/pve.yaml` template with local_user example
+
+### Documentation
+
+- Update CLAUDE.md entity model with postures
+- Document posture schema and resolution order
+
 ## v0.12 - 2025-01-09
 
 - Release alignment with homestak-dev v0.12
