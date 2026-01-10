@@ -4,7 +4,23 @@
 defaults:
   timezone: America/Denver
   domain: local
-  datastore: local-zfs
+  # datastore removed in v0.13 - now required in nodes/*.yaml
+  # Run 'make node-config FORCE=1' to regenerate node configs
   ssh_user: root
   bridge: vmbr0
   gateway: 10.0.12.1
+
+  # Base packages installed on all VMs
+  packages:
+    - htop
+    - curl
+    - wget
+    - git
+    - vim
+    - tmux
+    - tree
+    - jq
+    - rsync
+
+  # Proxmox settings
+  pve_remove_subscription_nag: true

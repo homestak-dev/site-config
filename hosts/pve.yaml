@@ -6,3 +6,8 @@ access:
   ssh_user: root
   authorized_keys:
     - jderose@studio    # FK -> secrets.ssh_keys["jderose@studio"]
+
+# Optional: non-root user for user.yml playbook
+# Uncomment and set to create a local user with sudo access
+# local_user: homestak
+# local_user_shell: /bin/bash

@@ -2,6 +2,9 @@
 # Primary key derived from filename: nested-pve.yaml -> nested-pve
 # Node specified at deploy time via: run.sh --host <name>
 ---
+# Security posture: FK -> postures/dev.yaml
+posture: dev
+
 # VM ID allocation: base + index (omit for PVE auto-assign)
 vmid_base: 99800
 

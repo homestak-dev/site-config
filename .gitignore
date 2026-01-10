@@ -6,9 +6,8 @@ secrets.yaml
 nodes/*.yaml
 !nodes/nested-pve.yaml
 
-# Encrypted secrets (gitignored by default for public template)
-# Remove these lines if you want to commit encrypted secrets to a private fork
-secrets.yaml.enc
+# Encrypted secrets (committed to enable sharing with private forks)
+# The plaintext secrets.yaml is still gitignored above
 
 # Editor files
 *.swp

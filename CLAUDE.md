@@ -4,24 +4,24 @@ This file provides guidance to Claude Code when working with this repository.
 
 ## Overview
 
-Site-specific configuration for homestak deployments using a normalized 4-entity YAML structure. Separates concerns: physical machines, PVE instances, VM templates, and deployment topologies.
+Site-specific configuration for homestak deployments using a normalized 5-entity YAML structure. Separates concerns: physical machines, PVE instances, VM templates, security postures, and deployment topologies.
 
-## Entity Model (4NF)
+## Entity Model (5NF)
 
 ```
-┌─────────────┐                     ┌─────────────┐
-│   hosts/    │                     │    vms/     │
-│ (physical)  │                     │ (templates) │
-│  Ansible    │                     │ Tofu/Packer │
-└──────┬──────┘                     └──────┬──────┘
-       │                                   │
-       │ FK: host                          │ FK: vm
-       ▼                                   ▼
-┌─────────────┐                     ┌─────────────┐
-│   nodes/    │◄── --host=X ───────│   envs/     │
-│  (PVE API)  │    (deploy-time)   │ (templates) │
-│    Tofu     │                     │    Tofu     │
-└─────────────┘                     └─────────────┘
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   hosts/    │     │  postures/  │     │    vms/     │
+│ (physical)  │     │ (security)  │     │ (templates) │
+│  Ansible    │     │   Ansible   │     │ Tofu/Packer │
+└──────┬──────┘     └──────┬──────┘     └──────┬──────┘
+       │                   │                   │
+       │ FK: host          │ FK: posture       │ FK: vm
+       ▼                   ▼                   ▼
+┌─────────────┐     ┌─────────────┐
+│   nodes/    │◄────│   envs/     │
+│  (PVE API)  │     │ (templates) │
+│    Tofu     │     │    Tofu     │
+└─────────────┘     └─────────────┘
 ```
 
 **Note:** Primary keys are derived from filenames (e.g., `hosts/father.yaml` → identifier is `father`).
@@ -40,6 +40,10 @@ site-config/
 ├── nodes/                 # PVE instances (filename must match PVE node name)
 │   ├── {nodename}.yaml    # e.g., father.yaml for node named "father"
 │   └── nested-pve.yaml    # Nested PVE (parent_node reference)
+├── postures/              # Security postures for environments
+│   ├── dev.yaml           # Permissive: SSH password auth, sudo nopasswd
+│   ├── prod.yaml          # Hardened: no root login, fail2ban enabled
+│   └── local.yaml         # On-box execution posture
 ├── vms/                   # VM templates
 │   ├── presets/           # Size presets (small, medium, large)
 │   │   └── {size}.yaml
@@ -56,12 +60,15 @@ site-config/
 
 ### site.yaml
 Non-sensitive defaults inherited by all entities:
-- `defaults.timezone`
-- `defaults.domain`
-- `defaults.datastore`
-- `defaults.ssh_user`
+- `defaults.timezone` - System timezone (e.g., America/Denver)
+- `defaults.domain` - Network domain
+- `defaults.ssh_user` - Default SSH user (typically root)
 - `defaults.bridge` - Default network bridge
 - `defaults.gateway` - Default gateway for static IPs
+- `defaults.packages` - Base packages installed on all VMs
+- `defaults.pve_remove_subscription_nag` - Remove PVE subscription popup (bool)
+
+**Note:** `datastore` was moved to nodes/ in v0.13 - it's now required per-node.
 
 ### secrets.yaml
 ALL sensitive values in one file (encrypted):
@@ -84,10 +91,32 @@ Primary key derived from filename (e.g., `father.yaml` → `father`).
 - `parent_node` - FK to nodes/ (for nested PVE, instead of host)
 - `api_endpoint` - Proxmox API URL
 - `api_token` - Reference to secrets.api_tokens (FK)
-- `datastore` - Default storage (optional, falls back to site.yaml)
+- `datastore` - Storage for VMs (REQUIRED in v0.13+)
 - `ip` - Node IP for SSH access
 
 **Git tracking:** Site-specific node configs (e.g., `father.yaml`, `mother.yaml`) are excluded from git via `.gitignore`. Only `nested-pve.yaml` is tracked (required for integration testing). Generate your node config with `make node-config` on each PVE host.
+
+**Migration (v0.13):** If upgrading from earlier versions, regenerate node configs:
+```bash
+make node-config FORCE=1
+```
+
+### postures/{name}.yaml
+Security posture configuration for environments.
+Primary key derived from filename (e.g., `dev.yaml` → `dev`).
+Referenced by envs via `posture:` FK.
+
+- `ssh_port` - SSH port (default: 22)
+- `ssh_permit_root_login` - Root login policy (yes/no/prohibit-password)
+- `ssh_password_authentication` - Password auth policy (yes/no)
+- `sudo_nopasswd` - Passwordless sudo (bool)
+- `fail2ban_enabled` - Enable fail2ban (bool)
+- `packages` - Additional packages (merged with site.yaml packages)
+
+Available postures:
+- `dev` - Permissive (SSH password auth, sudo nopasswd)
+- `prod` - Hardened (no root login, fail2ban enabled)
+- `local` - On-box execution posture
 
 ### vms/presets/{size}.yaml
 Size presets for VM resource allocation.
@@ -117,6 +146,7 @@ Primary key derived from filename (e.g., `nested-pve.yaml` → `nested-pve`).
 Deployment topology template defining VM layouts.
 Primary key derived from filename (e.g., `dev.yaml` → `dev`).
 Node-agnostic: target host specified at deploy time via `run.sh --host`.
+- `posture` - FK to postures/ (default: dev)
 - `vmid_base` - Base VM ID for auto-allocation (omit for PVE auto-assign)
 - `vms[]` - List of VM instances:
   - `name` - VM hostname
@@ -188,9 +218,9 @@ iac-driver's ConfigResolver resolves all references at runtime and generates fla
 
 | Repo | Uses |
 |------|------|
-| iac-driver | All entities - resolves config and generates tfvars for tofu |
+| iac-driver | All entities - resolves config for tofu (tfvars.json) and ansible (ansible-vars.json) |
 | tofu | Receives flat tfvars from iac-driver (no direct site-config access) |
-| ansible | `hosts/*.yaml` for host configuration |
+| ansible | Receives resolved vars from iac-driver; uses `hosts/*.yaml` for host configuration |
 | bootstrap | Clones and sets up site-config |
 
 ## Migration from tfvars
