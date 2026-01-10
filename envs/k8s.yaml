@@ -2,6 +2,8 @@
 # Primary key derived from filename: k8s.yaml -> k8s
 # Node specified at deploy time via: run.sh --host <name>
 ---
+# Security posture: FK -> postures/prod.yaml (k8s should be hardened)
+posture: prod
+
 # VM ID allocation: omit vmid_base for PVE auto-assign
 # vms: (K8s cluster VMs to be defined in future phase)
-{}

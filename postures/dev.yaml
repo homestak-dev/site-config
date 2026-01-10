@@ -1,0 +1,14 @@
+# Development security posture
+# Permissive settings for development/testing environments
+---
+ssh_port: 22
+ssh_permit_root_login: "yes"
+ssh_password_authentication: "yes"
+sudo_nopasswd: true
+fail2ban_enabled: false
+
+# Additional packages for development
+packages:
+  - net-tools
+  - strace
+  - tcpdump

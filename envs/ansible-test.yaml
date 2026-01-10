@@ -2,6 +2,9 @@
 # Purpose: Validate lae.proxmox, DebOps, geerlingguy roles
 # Node specified at deploy time via: run.sh --host <name>
 ---
+# Security posture: FK -> postures/dev.yaml
+posture: dev
+
 vmid_base: 10100
 
 vms:
