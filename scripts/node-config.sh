@@ -30,6 +30,23 @@ if [ -f "$OUTPUT_FILE" ] && [ "$FORCE" != "1" ]; then
     exit 1
 fi
 
+# Get IP address from vmbr0
+NODE_IP=""
+if command -v ip >/dev/null 2>&1; then
+    NODE_IP=$(ip -j addr show dev vmbr0 2>/dev/null | python3 -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    for iface in data:
+        for addr in iface.get('addr_info', []):
+            if addr.get('family') == 'inet':
+                print(addr['local'])
+                break
+except:
+    pass
+" 2>/dev/null || true)
+fi
+
 # Determine datastore (prefer local-zfs, fallback to local)
 if command -v zpool >/dev/null 2>&1 && zpool list -H -o name 2>/dev/null | grep -q .; then
     DATASTORE="local-zfs"
@@ -57,4 +74,17 @@ host: $HOSTNAME              # FK -> hosts/$HOSTNAME.yaml
 api_endpoint: https://${FQDN}:8006
 api_token: $HOSTNAME         # FK -> secrets.api_tokens (manual setup required)
 datastore: $DATASTORE
+EOF
+
+# Add IP if detected
+if [ -n "$NODE_IP" ]; then
+    echo "ip: $NODE_IP"
+fi
+
+# Add ssh_user comment
+cat <<EOF
+
+# SSH user for ansible access (default from site.yaml: root)
+# Uncomment to override:
+# ssh_user: root
 EOF

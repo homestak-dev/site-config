@@ -79,9 +79,37 @@ ALL sensitive values in one file (encrypted):
 ### hosts/{name}.yaml
 Physical machine configuration for SSH access and host management.
 Primary key derived from filename (e.g., `father.yaml` → `father`).
-- `access.ssh_user` - SSH username
+
+**Core fields:**
+- `host` - Hostname (matches filename)
+- `domain` - Network domain (extracted from FQDN or resolv.conf)
+
+**Network section:**
+- `network.interfaces.{bridge}` - Bridge configurations:
+  - `type` - Interface type (bridge)
+  - `ports` - Physical ports attached to bridge
+  - `address` - IP address with CIDR (e.g., 10.0.12.61/24)
+  - `gateway` - Default gateway (if default route uses this bridge)
+
+**Storage section:**
+- `storage.zfs_pools[]` - ZFS pool configurations:
+  - `name` - Pool name
+  - `devices` - Backing devices
+
+**Hardware section:**
+- `hardware.cpu_cores` - Number of CPU cores
+- `hardware.memory_gb` - Total RAM in GB
+
+**Access section:**
+- `access.ssh_user` - SSH username (default: root)
+- `access.ssh_port` - SSH port (default: 22)
 - `access.authorized_keys` - References to secrets.ssh_keys by user@host identifier (FK)
-- (Phase 4: network, storage, system config)
+
+**SSH section:**
+- `ssh.permit_root_login` - Root login policy (yes/no/prohibit-password)
+- `ssh.password_authentication` - Password auth policy (yes/no)
+
+**Git tracking:** Site-specific host configs are excluded from git via `.gitignore`. Generate your host config with `make host-config` on each physical host.
 
 ### nodes/{name}.yaml
 PVE instance configuration for API access.
@@ -184,8 +212,8 @@ make host-config FORCE=1
 make node-config FORCE=1
 ```
 
-`host-config` gathers: network bridges (vmbr*), ZFS pools, SSH access
-`node-config` gathers: PVE API endpoint, datastore (requires PVE installed)
+`host-config` gathers: domain, network bridges, ZFS pools, hardware (CPU/RAM), SSH settings
+`node-config` gathers: PVE API endpoint, datastore, IP address (requires PVE installed)
 
 ## Secrets Management
 
