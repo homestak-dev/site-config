@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Gitignore `hosts/*.yaml` (matches `nodes/*.yaml` pattern) - generate locally via `make host-config`
+
 ## v0.16 - 2026-01-11
 
 - Release alignment with homestak v0.16
