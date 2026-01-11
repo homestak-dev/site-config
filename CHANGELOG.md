@@ -2,9 +2,22 @@
 
 ## Unreleased
 
-### Changed
+## v0.17 - 2026-01-11
 
-- Gitignore `hosts/*.yaml` (matches `nodes/*.yaml` pattern) - generate locally via `make host-config`
+### Added
+- host-config.sh: Domain extraction from FQDN or resolv.conf (#31)
+- host-config.sh: Hardware section with cpu_cores and memory_gb (#31)
+- host-config.sh: SSH section with permit_root_login and password_authentication (#31)
+- node-config.sh: IP extraction from vmbr0 interface (#32)
+- node-config.sh: ssh_user comment noting site.yaml default (#32)
+
+### Changed
+- Gitignore `hosts/*.yaml` (matches `nodes/*.yaml` pattern)
+- API token renamed from `tofu` to `homestak` for branding consistency (#15)
+
+### Documentation
+- CLAUDE.md: Full hosts/{name}.yaml schema with all sections (#13)
+- CLAUDE.md: Updated Config Generation section with new fields
 
 ## v0.16 - 2026-01-11
 
