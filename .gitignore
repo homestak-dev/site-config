@@ -1,9 +1,10 @@
 # Plaintext secrets (never commit)
 secrets.yaml
 
-# Site-specific node configs (generated per-deployment via make node-config)
-# Keep nested-pve.yaml tracked for integration testing
+# Site-specific configs (generated per-deployment via make host-config, make node-config)
+hosts/*.yaml
 nodes/*.yaml
+# Keep nested-pve.yaml tracked for integration testing
 !nodes/nested-pve.yaml
 
 # Encrypted secrets (committed to enable sharing with private forks)
