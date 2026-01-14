@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## v0.19 - Unreleased
+
+### Added
+
+- Add `hosts/.gitkeep` to ensure directory structure is tracked (#16)
 
 ## v0.18 - 2026-01-13
 
