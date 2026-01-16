@@ -67,8 +67,11 @@ Non-sensitive defaults inherited by all entities:
 - `defaults.gateway` - Default gateway for static IPs
 - `defaults.packages` - Base packages installed on all VMs
 - `defaults.pve_remove_subscription_nag` - Remove PVE subscription popup (bool)
+- `defaults.packer_release` - Packer release for image downloads (default: `latest`)
 
 **Note:** `datastore` was moved to nodes/ in v0.13 - it's now required per-node.
+
+**Packer images:** The `latest` release is the primary source for packer images. Most versioned releases don't include images; automation defaults to `packer_release: latest`. Override with a specific version (e.g., `v0.20`) only when needed.
 
 ### secrets.yaml
 ALL sensitive values in one file (encrypted):
