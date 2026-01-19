@@ -1,5 +1,31 @@
 # Changelog
 
+## v0.32 - 2026-01-19
+
+### Added
+- Add `--help` and `--force` flags to host-config.sh and node-config.sh (#36)
+- Scripts now support both CLI flags and environment variables (FORCE=1)
+
+## v0.31 - 2026-01-19
+
+- Release alignment with homestak v0.31
+
+## v0.30 - 2026-01-18
+
+- Release alignment with homestak v0.30
+
+## v0.29 - 2026-01-18
+
+- Release alignment with homestak v0.29
+
+## v0.28 - 2026-01-18
+
+- Release alignment with homestak v0.28
+
+## v0.27 - 2026-01-17
+
+- Release alignment with homestak v0.27
+
 ## v0.26 - 2026-01-17
 
 - Release alignment with homestak v0.26
