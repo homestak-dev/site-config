@@ -1,18 +1,61 @@
 #!/bin/bash
 # Generate hosts/{hostname}.yaml from system inventory
-#
-# Usage: ./scripts/host-config.sh [FORCE=1]
-#
-# Gathers:
-#   - Network bridges (vmbr*) with IPs and ports
-#   - ZFS pools and devices
-#   - SSH access config
 
 set -e
 
+show_help() {
+    cat << 'EOF'
+host-config.sh - Generate hosts/{hostname}.yaml from system inventory
+
+Usage:
+  host-config.sh [options]
+  make host-config [FORCE=1]
+
+Options:
+  --help, -h    Show this help message
+  --force, -f   Overwrite existing config file
+
+Environment Variables:
+  FORCE=1       Same as --force (for make compatibility)
+
+Description:
+  Generates a hosts/*.yaml configuration file by gathering system information:
+  - Network bridges (vmbr*) with IPs and ports
+  - ZFS pools and devices
+  - SSH access configuration
+  - Hardware info (CPU cores, memory)
+
+  Run this on each physical host to bootstrap its configuration.
+
+Examples:
+  ./scripts/host-config.sh              # Generate config (fails if exists)
+  ./scripts/host-config.sh --force      # Overwrite existing config
+  make host-config FORCE=1              # Via Makefile
+EOF
+    exit 0
+}
+
+# Parse arguments
+FORCE="${FORCE:-0}"
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --help|-h)
+            show_help
+            ;;
+        --force|-f)
+            FORCE=1
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1" >&2
+            echo "Use --help for usage information." >&2
+            exit 1
+            ;;
+    esac
+done
+
 HOSTNAME=$(hostname -s)
 OUTPUT_FILE="hosts/${HOSTNAME}.yaml"
-FORCE="${FORCE:-0}"
 
 # Check if file exists
 if [ -f "$OUTPUT_FILE" ] && [ "$FORCE" != "1" ]; then

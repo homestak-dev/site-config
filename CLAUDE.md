@@ -213,6 +213,10 @@ make node-config   # Generate nodes/{hostname}.yaml from PVE info
 # Force overwrite existing files
 make host-config FORCE=1
 make node-config FORCE=1
+
+# Direct script usage (supports --help, --force)
+./scripts/host-config.sh --help
+./scripts/node-config.sh --force
 ```
 
 `host-config` gathers: domain, network bridges, ZFS pools, hardware (CPU/RAM), SSH settings
