@@ -1,21 +1,62 @@
 #!/bin/bash
 # Generate nodes/{hostname}.yaml from PVE system info
-#
-# Usage: ./scripts/node-config.sh [FORCE=1]
-#
-# Requires Proxmox VE to be installed.
-#
-# Gathers:
-#   - API endpoint (https://{fqdn}:8006)
-#   - Node name
-#   - Default datastore
 
 set -e
+
+show_help() {
+    cat << 'EOF'
+node-config.sh - Generate nodes/{hostname}.yaml from PVE system info
+
+Usage:
+  node-config.sh [options]
+  make node-config [FORCE=1]
+
+Options:
+  --help, -h    Show this help message
+  --force, -f   Overwrite existing config file
+
+Environment Variables:
+  FORCE=1       Same as --force (for make compatibility)
+
+Description:
+  Generates a nodes/*.yaml configuration file by gathering PVE information:
+  - API endpoint (https://{fqdn}:8006)
+  - Node name (must match PVE node name)
+  - Default datastore
+  - IP address from vmbr0
+
+  Requires Proxmox VE to be installed.
+
+Examples:
+  ./scripts/node-config.sh              # Generate config (fails if exists)
+  ./scripts/node-config.sh --force      # Overwrite existing config
+  make node-config FORCE=1              # Via Makefile
+EOF
+    exit 0
+}
+
+# Parse arguments
+FORCE="${FORCE:-0}"
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --help|-h)
+            show_help
+            ;;
+        --force|-f)
+            FORCE=1
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1" >&2
+            echo "Use --help for usage information." >&2
+            exit 1
+            ;;
+    esac
+done
 
 HOSTNAME=$(hostname -s)
 FQDN=$(hostname -f)
 OUTPUT_FILE="nodes/${HOSTNAME}.yaml"
-FORCE="${FORCE:-0}"
 
 # Check if PVE is installed
 if ! command -v pvesh >/dev/null 2>&1; then
