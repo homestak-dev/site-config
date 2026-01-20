@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Documentation
+- Document iac-driver hosts/ fallback resolution in CLAUDE.md
+  - `--host X` now falls back to `hosts/X.yaml` when `nodes/X.yaml` doesn't exist
+  - Enables provisioning fresh Debian hosts before PVE is installed
+
 ## v0.32 - 2026-01-19
 
 ### Added

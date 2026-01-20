@@ -114,6 +114,17 @@ Primary key derived from filename (e.g., `father.yaml` → `father`).
 
 **Git tracking:** Site-specific host configs are excluded from git via `.gitignore`. Generate your host config with `make host-config` on each physical host.
 
+**iac-driver usage (v0.36+):** When `--host X` is specified and `nodes/X.yaml` doesn't exist, iac-driver falls back to `hosts/X.yaml` for SSH-only access. This enables provisioning fresh Debian hosts before PVE is installed:
+```bash
+# Create host config on fresh Debian machine
+ssh root@<ip> "cd /usr/local/etc/homestak && make host-config"
+
+# Provision PVE using hosts/ config (no nodes/ yet)
+./run.sh --scenario pve-setup --host daughter
+
+# After pve-setup, nodes/daughter.yaml is auto-generated
+```
+
 ### nodes/{name}.yaml
 PVE instance configuration for API access.
 **Important:** Filename must match the actual PVE node name (check with `pvesh get /nodes`).
