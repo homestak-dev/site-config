@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.36 - 2026-01-20
+
 ### Documentation
 - Document iac-driver hosts/ fallback resolution in CLAUDE.md
   - `--host X` now falls back to `hosts/X.yaml` when `nodes/X.yaml` doesn't exist
