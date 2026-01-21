@@ -48,12 +48,15 @@ site-config/
 │   ├── presets/           # Size presets (small, medium, large)
 │   │   └── {size}.yaml
 │   └── {name}.yaml        # Custom templates
-└── envs/                  # Deployment topology templates (node-agnostic)
-    ├── dev.yaml           # env-specific config, node at deploy time
-    ├── test.yaml
-    ├── k8s.yaml
-    ├── ansible-test.yaml  # Ansible role validation
-    └── nested-pve.yaml    # Integration testing
+├── envs/                  # Deployment topology templates (node-agnostic)
+│   ├── dev.yaml           # env-specific config, node at deploy time
+│   ├── test.yaml
+│   ├── k8s.yaml
+│   ├── ansible-test.yaml  # Ansible role validation
+│   └── nested-pve.yaml    # Integration testing
+└── manifests/             # Recursive scenario manifests (v0.39+)
+    ├── n2-quick.yaml      # 2-level nested PVE test
+    └── n3-full.yaml       # 3-level nested PVE test
 ```
 
 ## Entity Definitions
@@ -195,6 +198,28 @@ Node-agnostic: target host specified at deploy time via `run.sh --host`.
   - `template` - FK to vms/ template
   - `vmid` - Explicit VM ID (overrides vmid_base + index)
   - (any template field can be overridden per-instance)
+
+### manifests/{name}.yaml (v0.39+)
+Manifest definitions for recursive-pve scenarios.
+Primary key derived from filename (e.g., `n2-quick.yaml` → `n2-quick`).
+
+Schema v1 fields:
+- `schema_version` - Always 1 for linear levels format
+- `name` - Manifest identifier
+- `description` - Human-readable description
+- `levels[]` - List of nesting levels:
+  - `name` - Level identifier (used in context keys)
+  - `env` - FK to envs/ (deployment topology)
+  - `image` - Optional image override
+  - `vmid_offset` - Optional offset from vmid_base
+  - `post_scenario` - Scenario to run after level is up (e.g., `pve-setup`)
+  - `post_scenario_args` - Arguments for post_scenario
+- `settings` - Optional settings:
+  - `verify_ssh` - Verify SSH access at each level (default: true)
+  - `cleanup_on_failure` - Destroy on failure (default: true)
+  - `timeout_buffer` - Extra timeout per level (default: 60)
+
+Built-in manifests: `n2-quick` (2 levels), `n3-full` (3 levels)
 
 ## Discovery Mechanism
 

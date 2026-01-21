@@ -1,0 +1,34 @@
+# Full 3-level nested PVE validation
+# Proves recursive architecture scales beyond N=2
+---
+schema_version: 1
+name: n3-full
+description: "Full 3-level nested PVE validation"
+
+levels:
+  - name: inner-pve
+    env: nested-pve
+    image: debian-13-pve
+    post_scenario: pve-setup
+    post_scenario_args:
+      - "--local"
+      - "--skip-preflight"
+
+  - name: leaf-pve
+    env: nested-pve
+    image: debian-13-pve
+    vmid_offset: 100
+    post_scenario: pve-setup
+    post_scenario_args:
+      - "--local"
+      - "--skip-preflight"
+
+  - name: test-vm
+    env: test
+    image: debian-12
+    post_scenario: null
+
+settings:
+  verify_ssh: true
+  cleanup_on_failure: true
+  timeout_buffer: 60

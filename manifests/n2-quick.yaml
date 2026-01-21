@@ -1,0 +1,25 @@
+# Quick 2-level nested PVE test
+# Equivalent to current nested-pve scenarios
+---
+schema_version: 1
+name: n2-quick
+description: "Quick 2-level nested PVE test"
+
+levels:
+  - name: inner-pve
+    env: nested-pve
+    image: debian-13-pve
+    post_scenario: pve-setup
+    post_scenario_args:
+      - "--local"
+      - "--skip-preflight"
+
+  - name: test-vm
+    env: test
+    image: debian-12
+    post_scenario: null
+
+settings:
+  verify_ssh: true
+  cleanup_on_failure: true
+  timeout_buffer: 60
