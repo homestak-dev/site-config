@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Added
+- Add `manifests/` directory for recursive-pve scenario configuration (#114)
+  - `n2-quick.yaml`: 2-level nested PVE test manifest
+  - `n3-full.yaml`: 3-level nested PVE test manifest
+  - Schema v1: Linear levels array with env, image, post_scenario support
+
 ## v0.36 - 2026-01-20
 
 ### Documentation
