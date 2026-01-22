@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.39 - 2026-01-22
+
 ### Added
 - Add `manifests/` directory for recursive-pve scenario configuration (#114)
   - `n2-quick.yaml`: 2-level nested PVE test manifest
