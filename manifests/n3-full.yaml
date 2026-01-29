@@ -15,7 +15,7 @@ levels:
       - "--skip-preflight"
 
   - name: leaf-pve
-    env: nested-pve
+    env: nested-pve-light
     image: debian-13-pve
     vmid_offset: 100
     post_scenario: pve-setup

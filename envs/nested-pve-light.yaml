@@ -1,0 +1,10 @@
+# Lightweight nested PVE environment (for deeper nesting levels)
+# Uses reduced memory (4GB) to fit inside constrained parent VMs
+---
+posture: dev
+
+vmid_base: 99800
+
+vms:
+  - name: leaf-pve
+    template: nested-pve-light
