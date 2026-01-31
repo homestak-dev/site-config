@@ -2,11 +2,11 @@
 # Validates manifest/inline infrastructure at simplest level
 #
 # Topology:
-#   father -> test (L1)
+#   host -> test (L1)
 ---
 schema_version: 1
 name: n1-basic
-description: "Basic single-VM test (no nesting)"
+description: "1-level Test VM"
 
 levels:
   - name: test

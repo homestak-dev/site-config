@@ -2,7 +2,7 @@
 # Equivalent to current nested-pve scenarios
 #
 # Topology:
-#   father -> nested-pve (L1) -> test (L2)
+#   host -> nested-pve (L1) -> test (L2)
 ---
 schema_version: 1
 name: n2-quick
