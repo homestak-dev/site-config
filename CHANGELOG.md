@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.41 - 2026-01-31
+
 ### Added
 - Add vm_preset mode to manifest levels (#40)
   - Levels can now use `vm_preset` + `vmid` + `image` instead of `env` FK
