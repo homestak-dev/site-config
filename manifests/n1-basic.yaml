@@ -1,0 +1,21 @@
+# Basic single-VM test
+# Validates manifest/inline infrastructure at simplest level
+#
+# Topology:
+#   host -> test (L1)
+---
+schema_version: 1
+name: n1-basic
+description: "1-level Test VM"
+
+levels:
+  - name: test
+    vm_preset: small
+    vmid: 99001
+    image: debian-12
+    post_scenario: null
+
+settings:
+  verify_ssh: true
+  cleanup_on_failure: true
+  timeout_buffer: 60
