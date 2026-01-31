@@ -1,5 +1,5 @@
 # Medium VM preset
-# 2 cores, 4GB RAM, 16GB disk
+# 2 cores, 4GB RAM, 20GB disk
 cores: 2
 memory: 4096
-disk: 16
+disk: 20

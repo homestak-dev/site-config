@@ -6,6 +6,9 @@ defaults:
   domain: local
   # datastore removed in v0.13 - now required in nodes/*.yaml
   # Run 'make node-config FORCE=1' to regenerate node configs
+  # automation_user: user created in VMs via cloud-init (with sudo)
+  # ssh_user: user for SSH to PVE hosts (typically root)
+  automation_user: homestak
   ssh_user: root
   bridge: vmbr0
   gateway: 10.0.12.1

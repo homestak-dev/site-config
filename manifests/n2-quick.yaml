@@ -1,21 +1,26 @@
 # Quick 2-level nested PVE test
 # Equivalent to current nested-pve scenarios
+#
+# Topology:
+#   father -> nested-pve (L1) -> test (L2)
 ---
 schema_version: 1
 name: n2-quick
-description: "Quick 2-level nested PVE test"
+description: "2-level Nested PVE + Test VM"
 
 levels:
-  - name: inner-pve
-    env: nested-pve
+  - name: nested-pve
+    vm_preset: large
+    vmid: 99011
     image: debian-13-pve
     post_scenario: pve-setup
     post_scenario_args:
       - "--local"
       - "--skip-preflight"
 
-  - name: test-vm
-    env: test
+  - name: test
+    vm_preset: medium
+    vmid: 99021
     image: debian-12
     post_scenario: null
 
