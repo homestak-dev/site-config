@@ -170,7 +170,7 @@ Primary key derived from filename (e.g., `small.yaml` → `small`).
 - `memory` - RAM in MB
 - `disk` - Disk size in GB
 
-Available presets: `xsmall` (1c/1GB/8GB), `small` (2c/2GB/8GB), `medium` (2c/4GB/16GB), `large` (4c/8GB/32GB), `xlarge` (8c/16GB/64GB)
+Available presets: `xsmall` (1c/1GB/8GB), `small` (2c/2GB/10GB), `medium` (2c/4GB/20GB), `large` (4c/8GB/40GB), `xlarge` (8c/16GB/64GB)
 
 ### vms/{name}.yaml
 VM template defining base configuration.
@@ -203,15 +203,20 @@ Node-agnostic: target host specified at deploy time via `run.sh --host`.
 Manifest definitions for recursive-pve scenarios.
 Primary key derived from filename (e.g., `n2-quick.yaml` → `n2-quick`).
 
+**Level modes (v0.41+):**
+- **env mode**: `env` FK references envs/ (traditional)
+- **vm_preset mode**: `vm_preset` + `vmid` + `image` (simpler, no envs/ dependency)
+
 Schema v1 fields:
 - `schema_version` - Always 1 for linear levels format
 - `name` - Manifest identifier
 - `description` - Human-readable description
 - `levels[]` - List of nesting levels:
   - `name` - Level identifier (used in context keys)
-  - `env` - FK to envs/ (deployment topology)
-  - `image` - Optional image override
-  - `vmid_offset` - Optional offset from vmid_base
+  - `env` - FK to envs/ (env mode)
+  - `vm_preset` - FK to vms/presets/ (vm_preset mode)
+  - `vmid` - Explicit VM ID (required for vm_preset mode)
+  - `image` - Image name (required for vm_preset mode, optional override for env mode)
   - `post_scenario` - Scenario to run after level is up (e.g., `pve-setup`)
   - `post_scenario_args` - Arguments for post_scenario
 - `settings` - Optional settings:
@@ -219,7 +224,7 @@ Schema v1 fields:
   - `cleanup_on_failure` - Destroy on failure (default: true)
   - `timeout_buffer` - Extra timeout per level (default: 60)
 
-Built-in manifests: `n2-quick` (2 levels), `n3-full` (3 levels)
+Built-in manifests: `n1-basic` (1 level), `n2-quick` (2 levels), `n3-full` (3 levels)
 
 ## Discovery Mechanism
 

@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### Added
+- Add vm_preset mode to manifest levels (#40)
+  - Levels can now use `vm_preset` + `vmid` + `image` instead of `env` FK
+  - Simpler manifest configuration without envs/ dependency
+  - Update n2-quick and n3-full manifests to use vm_preset mode
+
+- Add n1-basic manifest for single-level testing
+  - Single test VM deployment, simplest validation scenario
+
+### Changed
+- Update large preset disk size: 32GB → 40GB
+  - Consistent decimal scaling: small (10GB), medium (20GB), large (40GB)
+
 ## v0.39 - 2026-01-22
 
 ### Added
