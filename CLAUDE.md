@@ -90,14 +90,16 @@ father (pve, physical)
 v2/
 ├── defs/                  # Schema definitions
 │   ├── spec.schema.json   # JSON Schema for specifications
-│   └── node.schema.json   # JSON Schema for nodes
+│   ├── node.schema.json   # JSON Schema for nodes
+│   └── posture.schema.json # JSON Schema for postures
 ├── specs/                 # Specifications (what to become)
 │   ├── pve.yaml           # PVE host specification
 │   └── base.yaml          # Minimal Debian specification
-├── postures/              # Security postures (replicated from v1)
-│   ├── dev.yaml
-│   ├── prod.yaml
-│   └── local.yaml
+├── postures/              # Security postures with auth model
+│   ├── dev.yaml           # network trust
+│   ├── stage.yaml         # site_token auth
+│   ├── prod.yaml          # node_token auth
+│   └── local.yaml         # network trust (on-box)
 ├── presets/               # Size presets (with vm- prefix)
 │   ├── vm-xsmall.yaml
 │   ├── vm-small.yaml
@@ -193,6 +195,58 @@ access:
   api:
     endpoint: https://10.0.12.61:8006
     token: father
+```
+
+### Auth Model (Specify Phase)
+
+Authentication for the Specify phase ensures nodes are authorized to fetch their specs. The auth method is determined by posture, with optional node-level override.
+
+**Auth methods by posture:**
+
+| Posture | Auth Method | Token Source | Description |
+|---------|-------------|--------------|-------------|
+| dev | `network` | none | Trust network boundary |
+| local | `network` | none | On-box execution |
+| stage | `site_token` | `secrets.auth.site_token` | Shared site-wide token |
+| prod | `node_token` | `secrets.auth.node_tokens.{name}` | Per-node unique token |
+
+**Flow:**
+1. **Create**: Token injected via cloud-init (if required by posture)
+2. **Specify**: Node presents token when calling `homestak spec get`
+3. **Server**: Validates token before serving spec
+
+**Node-level override:**
+```yaml
+# v2/nodes/secure-node.yaml
+type: vm
+spec: base
+auth:
+  method: node_token  # Override posture default
+  token: secure-node  # FK to secrets.auth.node_tokens.secure-node
+```
+
+**Posture schema:**
+
+Schema: `v2/defs/posture.schema.json`
+
+```yaml
+# v2/postures/stage.yaml
+auth:
+  method: site_token
+
+ssh:
+  port: 22
+  permit_root_login: "prohibit-password"
+  password_authentication: "no"
+
+sudo:
+  nopasswd: false
+
+fail2ban:
+  enabled: true
+
+packages:
+  - net-tools
 ```
 
 ## Entity Definitions

@@ -6,10 +6,15 @@
 - Add `v2/` directory structure for lifecycle architecture (#152)
   - `v2/defs/spec.schema.json` - JSON Schema for specifications
   - `v2/defs/node.schema.json` - JSON Schema for nodes
+  - `v2/defs/posture.schema.json` - JSON Schema for postures
   - `v2/specs/` - Specifications (pve.yaml, base.yaml)
-  - `v2/postures/` - Security postures (replicated from v1)
+  - `v2/postures/` - Security postures with auth model
   - `v2/presets/` - Size presets with `vm-` prefix
   - `v2/nodes/` - Node templates with unified type model
+- Add auth model for Specify phase (#152)
+  - Posture-based auth: dev (network), stage (site_token), prod (node_token)
+  - Node-level auth override via `auth.method` and `auth.token`
+  - New `stage` posture for pre-production environments
 
 ### Changed
 - Rename lifecycle phases for clarity (#152)

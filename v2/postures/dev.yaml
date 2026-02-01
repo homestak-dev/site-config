@@ -1,11 +1,19 @@
 # Development security posture
 # Permissive settings for development/testing environments
 ---
-ssh_port: 22
-ssh_permit_root_login: "yes"
-ssh_password_authentication: "yes"
-sudo_nopasswd: true
-fail2ban_enabled: false
+auth:
+  method: network  # Trust network boundary
+
+ssh:
+  port: 22
+  permit_root_login: "yes"
+  password_authentication: "yes"
+
+sudo:
+  nopasswd: true
+
+fail2ban:
+  enabled: false
 
 # Additional packages for development
 packages:

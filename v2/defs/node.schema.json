@@ -164,6 +164,22 @@
         }
       },
       "additionalProperties": false
+    },
+    "auth": {
+      "type": "object",
+      "description": "Authentication for Specify phase (overrides posture default)",
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["network", "site_token", "node_token"],
+          "description": "Auth method: network (trust boundary), site_token (shared), node_token (per-node)"
+        },
+        "token": {
+          "type": "string",
+          "description": "FK to secrets.yaml auth.site_token or auth.node_tokens.{value}"
+        }
+      },
+      "additionalProperties": false
     }
   },
   "allOf": [

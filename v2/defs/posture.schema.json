@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://homestak.dev/schemas/posture.v1.json",
+  "title": "Posture Schema v1",
+  "description": "Defines a security posture for nodes",
+  "type": "object",
+  "properties": {
+    "auth": {
+      "type": "object",
+      "description": "Default authentication for Specify phase",
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["network", "site_token", "node_token"],
+          "default": "network",
+          "description": "Default auth method for nodes using this posture"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ssh": {
+      "type": "object",
+      "description": "SSH daemon configuration",
+      "properties": {
+        "port": {
+          "type": "integer",
+          "default": 22,
+          "description": "SSH port"
+        },
+        "permit_root_login": {
+          "type": "string",
+          "enum": ["yes", "no", "prohibit-password"],
+          "description": "Root login policy"
+        },
+        "password_authentication": {
+          "type": "string",
+          "enum": ["yes", "no"],
+          "description": "Password auth policy"
+        }
+      },
+      "additionalProperties": false
+    },
+    "sudo": {
+      "type": "object",
+      "description": "Sudo configuration",
+      "properties": {
+        "nopasswd": {
+          "type": "boolean",
+          "default": false,
+          "description": "Allow passwordless sudo"
+        }
+      },
+      "additionalProperties": false
+    },
+    "fail2ban": {
+      "type": "object",
+      "description": "Fail2ban configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable fail2ban"
+        }
+      },
+      "additionalProperties": false
+    },
+    "packages": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Additional packages for this posture"
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,21 @@
+# Staging security posture
+# Moderate security for staging/pre-production environments
+---
+auth:
+  method: site_token  # Shared site-wide token
+
+ssh:
+  port: 22
+  permit_root_login: "prohibit-password"
+  password_authentication: "no"
+
+sudo:
+  nopasswd: false
+
+fail2ban:
+  enabled: true
+
+# Debugging tools for staging
+packages:
+  - net-tools
+  - strace
