@@ -29,6 +29,7 @@
 
 ### Documentation
 - Document v2 structure in CLAUDE.md
+- Document secrets.yaml auth token structure
 - Update lifecycle phase terminology
 
 ## v0.41 - 2026-01-31
