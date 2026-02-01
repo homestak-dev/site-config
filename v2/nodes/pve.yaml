@@ -1,0 +1,7 @@
+# PVE node template
+# VM that will become a PVE host (nested virtualization)
+type: vm
+spec: pve
+image: debian-13-pve
+preset: vm-large
+disk: 64

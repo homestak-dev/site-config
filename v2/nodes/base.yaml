@@ -1,0 +1,6 @@
+# Base node template
+# Minimal VM for simple Debian workloads
+type: vm
+spec: base
+image: debian-12
+preset: vm-small

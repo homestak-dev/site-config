@@ -1,0 +1,11 @@
+# Production security posture
+# Hardened settings for production environments
+---
+ssh_port: 22
+ssh_permit_root_login: "no"
+ssh_password_authentication: "no"
+sudo_nopasswd: false
+fail2ban_enabled: true
+
+# No additional packages for prod (minimal attack surface)
+packages: []

@@ -1,0 +1,7 @@
+# Minimal Debian VM specification
+# Baseline for simple VMs with default packages only
+---
+schema_version: 1
+
+platform:
+  packages: []

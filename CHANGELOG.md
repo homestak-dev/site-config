@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+### Added
+- Add `v2/` directory structure for lifecycle architecture (#152)
+  - `v2/defs/spec.schema.json` - JSON Schema for specifications
+  - `v2/defs/node.schema.json` - JSON Schema for nodes
+  - `v2/specs/` - Specifications (pve.yaml, base.yaml)
+  - `v2/postures/` - Security postures (replicated from v1)
+  - `v2/presets/` - Size presets with `vm-` prefix
+  - `v2/nodes/` - Node templates with unified type model
+
+### Changed
+- Rename lifecycle phases for clarity (#152)
+  - Inception → Create, Discovery → Specify, Convergence → Apply
+  - Add Operate, Sustain, Destroy phases (6-phase model)
+  - Rename spec schema field `convergence` → `apply`
+- Introduce unified node model (#152)
+  - All compute entities (VM, CT, PVE, k3s) are "nodes"
+  - Nodes have `type` field: vm, ct, pve, k3s
+  - Parent-child relationships via `parent` field
+  - v1 hosts/ and nodes/ unchanged for compatibility
+
+### Documentation
+- Document v2 structure in CLAUDE.md
+- Update lifecycle phase terminology
+
 ## v0.41 - 2026-01-31
 
 ### Added

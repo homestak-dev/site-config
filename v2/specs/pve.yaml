@@ -1,0 +1,34 @@
+# PVE host specification
+# Used for VMs that should become Proxmox VE hosts
+---
+schema_version: 1
+
+access:
+  posture: dev
+  users:
+    - name: homestak
+      sudo: true
+      ssh_keys:
+        - ssh_keys.jderose
+
+platform:
+  packages:
+    - proxmox-ve
+    - postfix
+    - open-iscsi
+    - chrony
+    - htop
+    - curl
+    - wget
+  services:
+    enable:
+      - pveproxy
+      - pvedaemon
+      - pvestatd
+    disable:
+      - rpcbind
+
+config:
+  timezone: America/Denver
+  pve:
+    remove_subscription_nag: true
