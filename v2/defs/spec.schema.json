@@ -145,19 +145,19 @@
       },
       "additionalProperties": true
     },
-    "convergence": {
+    "apply": {
       "type": "object",
-      "description": "Optional - convergence settings",
+      "description": "Optional - apply phase settings",
       "properties": {
         "trigger": {
           "type": "string",
           "enum": ["schedule", "webhook", "manual"],
           "default": "manual",
-          "description": "How convergence is triggered"
+          "description": "How apply is triggered"
         },
         "interval": {
           "type": "string",
-          "description": "Interval for scheduled convergence (e.g., 1h, 30m)"
+          "description": "Interval for scheduled apply (e.g., 1h, 30m)"
         }
       },
       "additionalProperties": false

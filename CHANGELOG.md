@@ -10,9 +10,15 @@
   - `v2/presets/` - Size presets with `vm-` prefix
   - `v2/vms/` - VM templates (infrastructure sizing)
 
+### Changed
+- Rename lifecycle phases for clarity (#152)
+  - Inception → Create, Discovery → Specify, Convergence → Apply
+  - Add Operate, Sustain, Destroy phases (6-phase model)
+  - Rename spec schema field `convergence` → `apply`
+
 ### Documentation
 - Document v2 structure in CLAUDE.md
-- Update discovery mechanism to FHS paths only
+- Update lifecycle phase terminology
 
 ## v0.41 - 2026-01-31
 

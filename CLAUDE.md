@@ -61,7 +61,7 @@ site-config/
 
 ## v2 Structure (v0.45+)
 
-The `v2/` directory contains the next-generation lifecycle configuration for the Inception → Discovery → Convergence → Sustain model. It is self-contained, replicating entities from v1 that are needed for lifecycle phases.
+The `v2/` directory contains the next-generation lifecycle configuration for the Create → Specify → Apply → Operate → Sustain → Destroy model. It is self-contained, replicating entities from v1 that are needed for lifecycle phases.
 
 ```
 v2/
@@ -86,9 +86,9 @@ v2/
 ```
 
 **Lifecycle coverage:**
-- **Inception**: `v2/vms/` + `v2/presets/` (infrastructure sizing)
-- **Discovery**: `v2/specs/` (what to become)
-- **Convergence**: `v2/specs/` + `v2/postures/` (apply config)
+- **Create**: `v2/vms/` + `v2/presets/` (infrastructure sizing)
+- **Specify**: `v2/specs/` (what to become)
+- **Apply**: `v2/specs/` + `v2/postures/` (apply config)
 
 **Design rationale:**
 - v2 is self-contained, can evolve independently of v1
@@ -97,7 +97,7 @@ v2/
 
 ### v2/specs/{name}.yaml
 
-VM specifications define "what a VM should become" - packages, services, users, configuration. Consumed by `homestak discover` and `homestak converge`.
+VM specifications define "what a VM should become" - packages, services, users, configuration. Consumed by `homestak discover` (Specify phase) and `homestak apply` (Apply phase).
 
 Schema: `v2/defs/spec.schema.json`
 
@@ -109,7 +109,7 @@ Schema: `v2/defs/spec.schema.json`
 | `access` | No | Posture + users, defaults to `dev` posture |
 | `platform` | No | Packages + services |
 | `config` | No | Type-specific configuration |
-| `convergence` | No | Trigger settings |
+| `apply` | No | Trigger settings |
 
 **FK resolution (runtime):**
 - `access.posture` → `v2/postures/{value}.yaml`
