@@ -271,6 +271,18 @@ ALL sensitive values in one file (encrypted):
 - `api_tokens.{node}` - Proxmox API tokens
 - `passwords.vm_root` - VM root password hash
 - `ssh_keys.{user@host}` - SSH public keys (identifier matches key comment)
+- `auth.site_token` - Shared token for stage posture (v0.43+)
+- `auth.node_tokens.{name}` - Per-node tokens for prod posture (v0.43+)
+
+**Auth tokens (v0.43+):**
+```yaml
+# secrets.yaml structure for Specify phase authentication
+auth:
+  site_token: "shared-secret-for-staging"  # Used by stage posture
+  node_tokens:
+    dev1: "unique-token-for-dev1"          # Used by prod posture
+    dev2: "unique-token-for-dev2"
+```
 
 ### hosts/{name}.yaml
 Physical machine configuration for SSH access and host management.
