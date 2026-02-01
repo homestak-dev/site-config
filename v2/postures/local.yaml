@@ -1,0 +1,11 @@
+# Local execution security posture
+# For on-box ansible execution (no remote SSH)
+---
+ssh_port: 22
+ssh_permit_root_login: "prohibit-password"
+ssh_password_authentication: "no"
+sudo_nopasswd: true
+fail2ban_enabled: false
+
+# No additional packages
+packages: []

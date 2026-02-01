@@ -59,6 +59,66 @@ site-config/
     └── n3-full.yaml       # 3-level nested PVE test
 ```
 
+## v2 Structure (v0.45+)
+
+The `v2/` directory contains the next-generation lifecycle configuration for the Inception → Discovery → Convergence → Sustain model. It is self-contained, replicating entities from v1 that are needed for lifecycle phases.
+
+```
+v2/
+├── defs/                  # Schema definitions
+│   └── spec.schema.json   # JSON Schema for VM specifications
+├── specs/                 # VM specifications (what to become)
+│   ├── pve.yaml           # PVE host specification
+│   └── base.yaml          # Minimal Debian specification
+├── postures/              # Security postures (replicated from v1)
+│   ├── dev.yaml
+│   ├── prod.yaml
+│   └── local.yaml
+├── presets/               # Size presets (with vm- prefix)
+│   ├── vm-xsmall.yaml
+│   ├── vm-small.yaml
+│   ├── vm-medium.yaml
+│   ├── vm-large.yaml
+│   └── vm-xlarge.yaml
+└── vms/                   # VM templates (infrastructure)
+    ├── pve.yaml
+    └── base.yaml
+```
+
+**Lifecycle coverage:**
+- **Inception**: `v2/vms/` + `v2/presets/` (infrastructure sizing)
+- **Discovery**: `v2/specs/` (what to become)
+- **Convergence**: `v2/specs/` + `v2/postures/` (apply config)
+
+**Design rationale:**
+- v2 is self-contained, can evolve independently of v1
+- `secrets.yaml` remains shared (site-wide sensitive values)
+- `presets/` uses `vm-` prefix to allow future preset types (e.g., `network-`)
+
+### v2/specs/{name}.yaml
+
+VM specifications define "what a VM should become" - packages, services, users, configuration. Consumed by `homestak discover` and `homestak converge`.
+
+Schema: `v2/defs/spec.schema.json`
+
+| Section | Required | Description |
+|---------|----------|-------------|
+| `schema_version` | Yes | Must be `1` |
+| `identity` | No | Hostname/domain, defaults from `HOMESTAK_IDENTITY` |
+| `network` | No | Static IP config, omit for DHCP |
+| `access` | No | Posture + users, defaults to `dev` posture |
+| `platform` | No | Packages + services |
+| `config` | No | Type-specific configuration |
+| `convergence` | No | Trigger settings |
+
+**FK resolution (runtime):**
+- `access.posture` → `v2/postures/{value}.yaml`
+- `access.users[].ssh_keys[]` → `secrets.yaml → ssh_keys.{value}`
+
+### v2/vms/{name}.yaml
+
+VM templates define infrastructure sizing (cores, memory, disk, image). Same schema as v1 `vms/` but references `v2/presets/` with `vm-` prefix.
+
 ## Entity Definitions
 
 ### site.yaml
@@ -230,8 +290,8 @@ Built-in manifests: `n1-basic` (1 level), `n2-quick` (2 levels), `n3-full` (3 le
 
 Other homestak tools find site-config via:
 1. `$HOMESTAK_SITE_CONFIG` environment variable
-2. `../site-config/` sibling directory
-3. `/opt/homestak/site-config/` fallback
+2. `../site-config/` sibling directory (dev workspace)
+3. `/usr/local/etc/homestak/` (FHS-compliant bootstrap)
 
 ## Dependency Installation
 

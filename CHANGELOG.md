@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### Added
+- Add `v2/` directory structure for lifecycle architecture (#152)
+  - `v2/defs/spec.schema.json` - JSON Schema for VM specifications
+  - `v2/specs/` - VM specifications (pve.yaml, base.yaml)
+  - `v2/postures/` - Security postures (replicated from v1)
+  - `v2/presets/` - Size presets with `vm-` prefix
+  - `v2/vms/` - VM templates (infrastructure sizing)
+
+### Documentation
+- Document v2 structure in CLAUDE.md
+- Update discovery mechanism to FHS paths only
+
 ## v0.41 - 2026-01-31
 
 ### Added

@@ -1,0 +1,4 @@
+# Base VM template
+# Minimal infrastructure for simple Debian VMs
+image: debian-12
+preset: vm-small

@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://homestak.dev/schemas/spec.v1.json",
+  "title": "VM Specification Schema v1",
+  "description": "Defines what a VM should become",
+  "type": "object",
+  "required": ["schema_version"],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Schema version, must be 1"
+    },
+    "identity": {
+      "type": "object",
+      "description": "Optional - defaults from HOMESTAK_IDENTITY and site.yaml",
+      "properties": {
+        "hostname": {
+          "type": "string",
+          "description": "VM hostname, defaults to HOMESTAK_IDENTITY"
+        },
+        "domain": {
+          "type": "string",
+          "description": "Domain name, defaults from site.yaml"
+        }
+      },
+      "additionalProperties": false
+    },
+    "network": {
+      "type": "object",
+      "description": "Optional - omit for DHCP",
+      "properties": {
+        "ip": {
+          "type": "string",
+          "format": "ipv4",
+          "description": "Static IP address"
+        },
+        "gateway": {
+          "type": "string",
+          "format": "ipv4",
+          "description": "Default gateway"
+        },
+        "dns": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "ipv4"
+          },
+          "description": "DNS servers"
+        }
+      },
+      "required": ["ip", "gateway"],
+      "additionalProperties": false
+    },
+    "access": {
+      "type": "object",
+      "description": "Access configuration",
+      "properties": {
+        "posture": {
+          "type": "string",
+          "description": "FK to v2/postures/{value}.yaml, defaults to 'dev'"
+        },
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Username"
+              },
+              "sudo": {
+                "type": "boolean",
+                "default": false,
+                "description": "Grant sudo privileges"
+              },
+              "ssh_keys": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "FKs to secrets.yaml ssh_keys.*"
+              }
+            },
+            "additionalProperties": false
+          },
+          "description": "Users to create"
+        }
+      },
+      "additionalProperties": false
+    },
+    "platform": {
+      "type": "object",
+      "description": "Platform configuration - core of 'becoming'",
+      "properties": {
+        "packages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Packages to install, merged with site.yaml defaults"
+        },
+        "services": {
+          "type": "object",
+          "properties": {
+            "enable": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Services to enable"
+            },
+            "disable": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Services to disable"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "config": {
+      "type": "object",
+      "description": "Optional - type-specific configuration",
+      "properties": {
+        "timezone": {
+          "type": "string",
+          "description": "System timezone"
+        },
+        "pve": {
+          "type": "object",
+          "properties": {
+            "remove_subscription_nag": {
+              "type": "boolean",
+              "description": "Remove PVE subscription popup"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": true
+    },
+    "convergence": {
+      "type": "object",
+      "description": "Optional - convergence settings",
+      "properties": {
+        "trigger": {
+          "type": "string",
+          "enum": ["schedule", "webhook", "manual"],
+          "default": "manual",
+          "description": "How convergence is triggered"
+        },
+        "interval": {
+          "type": "string",
+          "description": "Interval for scheduled convergence (e.g., 1h, 30m)"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
