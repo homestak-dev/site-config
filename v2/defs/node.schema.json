@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://homestak.dev/schemas/node.v1.json",
+  "title": "Node Schema v1",
+  "description": "Defines a compute node (VM, CT, PVE host, k3s node)",
+  "type": "object",
+  "required": ["type"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": ["vm", "ct", "pve", "k3s"],
+      "description": "Node type: vm (KVM), ct (LXC), pve (Proxmox host), k3s (Kubernetes)"
+    },
+    "spec": {
+      "type": "string",
+      "description": "FK to v2/specs/{value}.yaml - what this node should become"
+    },
+    "parent": {
+      "type": "string",
+      "description": "Parent node this runs on (for vm/ct/k3s nodes)"
+    },
+    "preset": {
+      "type": "string",
+      "description": "FK to v2/presets/{value}.yaml - size preset"
+    },
+    "image": {
+      "type": "string",
+      "description": "Cloud image for VM nodes (e.g., debian-13-pve)"
+    },
+    "template": {
+      "type": "string",
+      "description": "OS template for CT nodes (e.g., debian-12-standard)"
+    },
+    "cores": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "CPU cores (overrides preset)"
+    },
+    "memory": {
+      "type": "integer",
+      "minimum": 128,
+      "description": "Memory in MB (overrides preset)"
+    },
+    "disk": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Disk size in GB (overrides preset)"
+    },
+    "unprivileged": {
+      "type": "boolean",
+      "default": true,
+      "description": "CT only: run as unprivileged container"
+    },
+    "features": {
+      "type": "object",
+      "description": "CT only: container features",
+      "properties": {
+        "nesting": {
+          "type": "boolean",
+          "description": "Enable nesting (for Docker-in-CT)"
+        },
+        "keyctl": {
+          "type": "boolean",
+          "description": "Enable keyctl syscall"
+        },
+        "fuse": {
+          "type": "boolean",
+          "description": "Enable FUSE mounts"
+        }
+      },
+      "additionalProperties": false
+    },
+    "hardware": {
+      "type": "object",
+      "description": "PVE only: physical hardware info",
+      "properties": {
+        "cpu_cores": {
+          "type": "integer",
+          "description": "Physical CPU cores"
+        },
+        "memory_gb": {
+          "type": "integer",
+          "description": "Physical RAM in GB"
+        }
+      },
+      "additionalProperties": false
+    },
+    "network": {
+      "type": "object",
+      "description": "Network configuration",
+      "properties": {
+        "bridge": {
+          "type": "string",
+          "description": "Network bridge (e.g., vmbr0)"
+        },
+        "ip": {
+          "type": "string",
+          "description": "IP address or 'dhcp'"
+        },
+        "gateway": {
+          "type": "string",
+          "description": "Default gateway"
+        },
+        "interfaces": {
+          "type": "object",
+          "description": "PVE only: bridge configurations",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "type": {"type": "string"},
+              "ports": {"type": "array", "items": {"type": "string"}},
+              "address": {"type": "string"},
+              "gateway": {"type": "string"}
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "access": {
+      "type": "object",
+      "description": "Access configuration",
+      "properties": {
+        "ssh": {
+          "type": "object",
+          "properties": {
+            "user": {
+              "type": "string",
+              "default": "root",
+              "description": "SSH username"
+            },
+            "port": {
+              "type": "integer",
+              "default": 22,
+              "description": "SSH port"
+            },
+            "authorized_keys": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "FKs to secrets.yaml ssh_keys.*"
+            }
+          },
+          "additionalProperties": false
+        },
+        "api": {
+          "type": "object",
+          "description": "PVE only: API access",
+          "properties": {
+            "endpoint": {
+              "type": "string",
+              "format": "uri",
+              "description": "PVE API URL"
+            },
+            "token": {
+              "type": "string",
+              "description": "FK to secrets.yaml api_tokens.*"
+            },
+            "datastore": {
+              "type": "string",
+              "description": "Default storage for VMs/CTs"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"type": {"const": "vm"}}},
+      "then": {"required": ["image"]}
+    },
+    {
+      "if": {"properties": {"type": {"const": "ct"}}},
+      "then": {"required": ["template"]}
+    }
+  ],
+  "additionalProperties": false
+}

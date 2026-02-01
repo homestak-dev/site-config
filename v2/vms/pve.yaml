@@ -1,5 +1,0 @@
-# PVE VM template
-# Infrastructure sizing for VMs that will become PVE hosts
-image: debian-13-pve
-preset: vm-large
-disk: 64

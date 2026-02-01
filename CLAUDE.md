@@ -63,11 +63,35 @@ site-config/
 
 The `v2/` directory contains the next-generation lifecycle configuration for the Create → Specify → Apply → Operate → Sustain → Destroy model. It is self-contained, replicating entities from v1 that are needed for lifecycle phases.
 
+### Unified Node Model
+
+All compute entities (VMs, containers, PVE hosts, k3s nodes) are "nodes" with a common lifecycle:
+
+```
+node (abstract)
+├── type: pve     → Proxmox VE hypervisor
+├── type: vm      → KVM virtual machine
+├── type: ct      → LXC container
+└── type: k3s     → Kubernetes node (future)
+```
+
+**Parent-child topology:**
+```
+father (pve, physical)
+├── dev1 (vm, parent: father)
+├── dev2 (ct, parent: father)
+└── nested-pve (vm, parent: father)
+    └── test1 (vm, parent: nested-pve)
+```
+
+### Directory Structure
+
 ```
 v2/
 ├── defs/                  # Schema definitions
-│   └── spec.schema.json   # JSON Schema for VM specifications
-├── specs/                 # VM specifications (what to become)
+│   ├── spec.schema.json   # JSON Schema for specifications
+│   └── node.schema.json   # JSON Schema for nodes
+├── specs/                 # Specifications (what to become)
 │   ├── pve.yaml           # PVE host specification
 │   └── base.yaml          # Minimal Debian specification
 ├── postures/              # Security postures (replicated from v1)
@@ -80,24 +104,25 @@ v2/
 │   ├── vm-medium.yaml
 │   ├── vm-large.yaml
 │   └── vm-xlarge.yaml
-└── vms/                   # VM templates (infrastructure)
-    ├── pve.yaml
-    └── base.yaml
+└── nodes/                 # Node templates (infrastructure)
+    ├── pve.yaml           # type: vm, spec: pve (nested PVE)
+    └── base.yaml          # type: vm, spec: base
 ```
 
 **Lifecycle coverage:**
-- **Create**: `v2/vms/` + `v2/presets/` (infrastructure sizing)
+- **Create**: `v2/nodes/` + `v2/presets/` (infrastructure provisioning)
 - **Specify**: `v2/specs/` (what to become)
-- **Apply**: `v2/specs/` + `v2/postures/` (apply config)
+- **Apply**: `v2/specs/` + `v2/postures/` (configuration)
 
 **Design rationale:**
 - v2 is self-contained, can evolve independently of v1
 - `secrets.yaml` remains shared (site-wide sensitive values)
 - `presets/` uses `vm-` prefix to allow future preset types (e.g., `network-`)
+- Unified node model supports VM, CT, PVE, and future k3s nodes
 
 ### v2/specs/{name}.yaml
 
-VM specifications define "what a VM should become" - packages, services, users, configuration. Consumed by `homestak discover` (Specify phase) and `homestak apply` (Apply phase).
+Specifications define "what a node should become" - packages, services, users, configuration. Consumed by `homestak spec get` (Specify phase) and `homestak spec apply` (Apply phase).
 
 Schema: `v2/defs/spec.schema.json`
 
@@ -115,9 +140,60 @@ Schema: `v2/defs/spec.schema.json`
 - `access.posture` → `v2/postures/{value}.yaml`
 - `access.users[].ssh_keys[]` → `secrets.yaml → ssh_keys.{value}`
 
-### v2/vms/{name}.yaml
+### v2/nodes/{name}.yaml
 
-VM templates define infrastructure sizing (cores, memory, disk, image). Same schema as v1 `vms/` but references `v2/presets/` with `vm-` prefix.
+Node templates define infrastructure for compute nodes. Each node has a `type` that determines its characteristics.
+
+Schema: `v2/defs/node.schema.json`
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `type` | Yes | Node type: `vm`, `ct`, `pve`, `k3s` |
+| `spec` | No | FK to specs/ - what this node should become |
+| `parent` | No | Parent node this runs on (for vm/ct/k3s) |
+| `preset` | No | FK to presets/ - size preset |
+| `image` | Yes (vm) | Cloud image for VM nodes |
+| `template` | Yes (ct) | OS template for CT nodes |
+| `cores`, `memory`, `disk` | No | Resource overrides |
+
+**Type-specific fields:**
+
+| Field | vm | ct | pve |
+|-------|----|----|-----|
+| `image` | ✓ | - | - |
+| `template` | - | ✓ | - |
+| `unprivileged` | - | ✓ | - |
+| `features` | - | ✓ | - |
+| `hardware` | - | - | ✓ |
+| `access.api` | - | - | ✓ |
+
+**Example (VM node):**
+```yaml
+type: vm
+spec: pve
+image: debian-13-pve
+preset: vm-large
+disk: 64
+```
+
+**Example (PVE node - future):**
+```yaml
+type: pve
+spec: pve
+hardware:
+  cpu_cores: 16
+  memory_gb: 64
+network:
+  interfaces:
+    vmbr0:
+      address: 10.0.12.61/24
+access:
+  ssh:
+    user: root
+  api:
+    endpoint: https://10.0.12.61:8006
+    token: father
+```
 
 ## Entity Definitions
 
