@@ -38,6 +38,10 @@ Foundation for VM lifecycle architecture: v2 directory structure with JSON schem
 - Document secrets.yaml auth token structure
 - Update lifecycle phase terminology
 
+## v0.42 - 2026-01-31
+
+- Release alignment with homestak v0.42
+
 ## v0.41 - 2026-01-31
 
 ### Added
