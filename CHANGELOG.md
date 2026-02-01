@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## v0.43 - 2026-02-01
+
+### Theme: V2 Schema Foundation
+
+Foundation for VM lifecycle architecture: v2 directory structure with JSON schemas for specifications, nodes, and postures.
+
 ### Added
 - Add `v2/` directory structure for lifecycle architecture (#152)
   - `v2/defs/spec.schema.json` - JSON Schema for specifications
