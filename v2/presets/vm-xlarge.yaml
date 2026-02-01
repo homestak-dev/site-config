@@ -1,5 +1,5 @@
 # Extra Large VM preset
-# 8 cores, 16GB RAM, 64GB disk
+# 8 cores, 16GB RAM, 80GB disk
 cores: 8
 memory: 16384
-disk: 64
+disk: 80
