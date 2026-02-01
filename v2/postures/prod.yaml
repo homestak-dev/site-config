@@ -1,11 +1,19 @@
 # Production security posture
 # Hardened settings for production environments
 ---
-ssh_port: 22
-ssh_permit_root_login: "no"
-ssh_password_authentication: "no"
-sudo_nopasswd: false
-fail2ban_enabled: true
+auth:
+  method: node_token  # Per-node unique tokens
+
+ssh:
+  port: 22
+  permit_root_login: "no"
+  password_authentication: "no"
+
+sudo:
+  nopasswd: false
+
+fail2ban:
+  enabled: true
 
 # No additional packages for prod (minimal attack surface)
 packages: []
