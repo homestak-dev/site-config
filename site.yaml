@@ -27,3 +27,8 @@ defaults:
 
   # Proxmox settings
   pve_remove_subscription_nag: true
+
+  # Spec server for Create → Specify flow (v0.45+)
+  # Empty string means spec discovery disabled
+  # Set to "https://<controller>:44443" to enable
+  spec_server: ""
