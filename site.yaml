@@ -30,5 +30,6 @@ defaults:
 
   # Spec server for Create → Specify flow (v0.45+)
   # Empty string means spec discovery disabled
+  # Use IP address (not hostname) since VMs may lack DNS
   # Note: HTTP (not HTTPS) - server uses Python HTTPServer
-  spec_server: "http://father:44443"
+  spec_server: "http://10.0.12.61:44443"
