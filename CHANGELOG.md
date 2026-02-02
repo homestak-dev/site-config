@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Added
+- Add `v2/specs/test.yaml` for spec-vm-roundtrip validation (#154)
+
+### Changed
+- Configure `spec_server` in site.yaml for Create → Specify flow (#154)
+
 ## v0.44 - 2026-02-02
 
 - Release alignment with homestak v0.44
