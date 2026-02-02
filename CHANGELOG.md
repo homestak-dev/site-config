@@ -2,8 +2,17 @@
 
 ## Unreleased
 
+## v0.45 - 2026-02-02
+
+### Theme: Create Integration
+
+Integrates Create phase with Specify mechanism for automatic spec discovery.
+
 ### Added
 - Add `v2/specs/test.yaml` for spec-vm-roundtrip validation (#154)
+- Add `defaults.spec_server` field to site.yaml (#154)
+- Add `auth.site_token` placeholder to secrets.yaml (#154)
+- Add `auth.node_tokens` section to secrets.yaml (#154)
 
 ### Changed
 - Configure `spec_server` in site.yaml for Create → Specify flow (#154)
