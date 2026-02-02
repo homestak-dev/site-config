@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Added
+- Add `v2/specs/test.yaml` for spec-vm-roundtrip validation (#154)
+
+### Changed
+- Configure `spec_server` in site.yaml for Create → Specify flow (#154)
+  - Use FQDN (e.g., `father.core`) - VMs resolve via DNS search domain
+  - Short hostnames (e.g., `father`) don't resolve from VMs
+  - Use HTTP protocol (serve.py uses Python HTTPServer, no TLS)
+
 ## v0.44 - 2026-02-02
 
 - Release alignment with homestak v0.44

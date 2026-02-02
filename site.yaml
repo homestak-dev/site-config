@@ -30,5 +30,6 @@ defaults:
 
   # Spec server for Create → Specify flow (v0.45+)
   # Empty string means spec discovery disabled
-  # Set to "https://<controller>:44443" to enable
-  spec_server: ""
+  # Use FQDN (not short hostname) - VMs resolve via DNS search domain
+  # Note: HTTP (not HTTPS) - server uses Python HTTPServer
+  spec_server: "http://father.core:44443"
