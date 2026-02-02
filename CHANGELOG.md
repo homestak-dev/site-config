@@ -8,6 +8,7 @@
 ### Changed
 - Configure `spec_server` in site.yaml for Create → Specify flow (#154)
   - Use IP address instead of hostname (VMs may lack DNS resolution)
+  - Use HTTP protocol (serve.py uses Python HTTPServer, no TLS)
 
 ## v0.44 - 2026-02-02
 
