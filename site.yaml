@@ -30,5 +30,5 @@ defaults:
 
   # Spec server for Create → Specify flow (v0.45+)
   # Empty string means spec discovery disabled
-  # Set to "https://<controller>:44443" to enable
-  spec_server: "https://father:44443"
+  # Use IP address (not hostname) since VMs may lack DNS
+  spec_server: "https://10.0.12.61:44443"
