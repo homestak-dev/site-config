@@ -61,7 +61,7 @@ site-config/
 
 ## v2 Structure (v0.45+)
 
-The `v2/` directory contains the next-generation lifecycle configuration for the Create → Specify → Apply → Operate → Sustain → Destroy model. It is self-contained, replicating entities from v1 that are needed for lifecycle phases.
+The `v2/` directory contains the next-generation lifecycle configuration for the create → config → run → destroy model. It is self-contained, replicating entities from v1 that are needed for lifecycle phases.
 
 ### Unified Node Model
 
@@ -112,9 +112,8 @@ v2/
 ```
 
 **Lifecycle coverage:**
-- **Create**: `v2/nodes/` + `v2/presets/` (infrastructure provisioning)
-- **Specify**: `v2/specs/` (what to become)
-- **Apply**: `v2/specs/` + `v2/postures/` (configuration)
+- **create**: `v2/nodes/` + `v2/presets/` (infrastructure provisioning)
+- **config**: `v2/specs/` + `v2/postures/` (fetch spec, apply configuration)
 
 **Design rationale:**
 - v2 is self-contained, can evolve independently of v1
@@ -124,7 +123,7 @@ v2/
 
 ### v2/specs/{name}.yaml
 
-Specifications define "what a node should become" - packages, services, users, configuration. Consumed by `homestak spec get` (Specify phase) and `homestak spec apply` (Apply phase).
+Specifications define "what a node should become" - packages, services, users, configuration. Consumed by `homestak spec get` (config phase) and `homestak config` (config phase).
 
 Schema: `v2/defs/spec.schema.json`
 
@@ -197,9 +196,9 @@ access:
     token: father
 ```
 
-### Auth Model (Specify Phase)
+### Auth Model (Config Phase)
 
-Authentication for the Specify phase ensures nodes are authorized to fetch their specs. The auth method is determined by posture, with optional node-level override.
+Authentication for the config phase ensures nodes are authorized to fetch their specs. The auth method is determined by posture, with optional node-level override.
 
 **Auth methods by posture:**
 
@@ -211,8 +210,8 @@ Authentication for the Specify phase ensures nodes are authorized to fetch their
 | prod | `node_token` | `secrets.auth.node_tokens.{name}` | Per-node unique token |
 
 **Flow:**
-1. **Create**: Token injected via cloud-init (if required by posture)
-2. **Specify**: Node presents token when calling `homestak spec get`
+1. **create**: Token injected via cloud-init (if required by posture)
+2. **config**: Node presents token when calling `homestak spec get`
 3. **Server**: Validates token before serving spec
 
 **Node-level override:**
@@ -261,7 +260,7 @@ Non-sensitive defaults inherited by all entities:
 - `defaults.packages` - Base packages installed on all VMs
 - `defaults.pve_remove_subscription_nag` - Remove PVE subscription popup (bool)
 - `defaults.packer_release` - Packer release for image downloads (default: `latest`)
-- `defaults.spec_server` - Spec server URL for Create → Specify flow (v0.45+, default: empty/disabled)
+- `defaults.spec_server` - Spec server URL for create → config flow (v0.45+, default: empty/disabled)
 
 **Note:** `datastore` was moved to nodes/ in v0.13 - it's now required per-node.
 
@@ -277,7 +276,7 @@ ALL sensitive values in one file (encrypted):
 
 **Auth tokens (v0.43+):**
 ```yaml
-# secrets.yaml structure for Specify phase authentication
+# secrets.yaml structure for config phase authentication
 auth:
   site_token: "shared-secret-for-staging"  # Used by stage posture
   node_tokens:
