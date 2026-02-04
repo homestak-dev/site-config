@@ -145,19 +145,39 @@
       },
       "additionalProperties": true
     },
-    "apply": {
+    "run": {
       "type": "object",
-      "description": "Optional - apply phase settings",
+      "description": "Optional - run phase settings for convergence",
       "properties": {
         "trigger": {
           "type": "string",
-          "enum": ["schedule", "webhook", "manual"],
+          "enum": ["schedule", "webhook", "git", "manual"],
           "default": "manual",
-          "description": "How apply is triggered"
+          "description": "How convergence is triggered"
         },
         "interval": {
           "type": "string",
-          "description": "Interval for scheduled apply (e.g., 1h, 30m)"
+          "description": "Interval for scheduled convergence (e.g., 1h, 30m)"
+        },
+        "port": {
+          "type": "integer",
+          "description": "Port for webhook trigger"
+        },
+        "path": {
+          "type": "string",
+          "description": "Path for webhook trigger (e.g., /converge)"
+        },
+        "repo": {
+          "type": "string",
+          "description": "Git repo URL for git trigger"
+        },
+        "branch": {
+          "type": "string",
+          "description": "Git branch to watch for git trigger"
+        },
+        "poll_interval": {
+          "type": "string",
+          "description": "Poll interval for git trigger (e.g., 5m)"
         }
       },
       "additionalProperties": false
