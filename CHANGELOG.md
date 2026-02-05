@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Added
+- Add CI workflow with YAML validation (homestak-dev#190)
+
 ## v0.45 - 2026-02-02
 
 ### Theme: Create Integration
