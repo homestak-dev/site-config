@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://homestak.dev/schemas/manifest.v2.json",
+  "title": "Manifest Schema v2",
+  "description": "Graph-based manifest for infrastructure orchestration. Nodes define VMs/CTs with parent references forming a deployment tree.",
+  "type": "object",
+  "required": ["schema_version", "name", "nodes"],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 2,
+      "description": "Must be 2 for graph-based node format"
+    },
+    "name": {
+      "type": "string",
+      "description": "Manifest identifier"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description"
+    },
+    "pattern": {
+      "type": "string",
+      "enum": ["flat", "tiered"],
+      "default": "flat",
+      "description": "Topology shape: flat (all on target host) or tiered (parent-child nesting)"
+    },
+    "execution": {
+      "type": "object",
+      "description": "Default execution settings",
+      "properties": {
+        "default_mode": {
+          "type": "string",
+          "enum": ["push", "pull"],
+          "default": "push",
+          "description": "Default execution mode: push (SSH from controller) or pull (deferred)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "description": "List of nodes to deploy. parent=null means deployed on target host.",
+      "items": {
+        "type": "object",
+        "required": ["name", "type"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Node identifier (used as VM hostname and context key prefix)"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["vm", "ct", "pve"],
+            "description": "Node type: vm (KVM), ct (LXC), pve (Proxmox VE host)"
+          },
+          "spec": {
+            "type": "string",
+            "description": "FK to v2/specs/{value}.yaml - what this node should become"
+          },
+          "preset": {
+            "type": "string",
+            "description": "FK to v2/presets/{value}.yaml - size preset (vm- prefixed)"
+          },
+          "image": {
+            "type": "string",
+            "description": "Cloud image name (required for vm/pve types)"
+          },
+          "vmid": {
+            "type": "integer",
+            "minimum": 100,
+            "description": "Explicit VM ID"
+          },
+          "disk": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Disk size in GB (overrides preset)"
+          },
+          "parent": {
+            "type": ["string", "null"],
+            "description": "FK to another node name. null or omitted = root node on target host."
+          },
+          "execution": {
+            "type": "object",
+            "description": "Per-node execution overrides",
+            "properties": {
+              "mode": {
+                "type": "string",
+                "enum": ["push", "pull"],
+                "description": "Override default execution mode for this node"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "settings": {
+      "type": "object",
+      "description": "Execution settings",
+      "properties": {
+        "verify_ssh": {
+          "type": "boolean",
+          "default": true,
+          "description": "Verify SSH access at each node"
+        },
+        "cleanup_on_failure": {
+          "type": "boolean",
+          "default": true,
+          "description": "Destroy created nodes on failure"
+        },
+        "timeout_buffer": {
+          "type": "integer",
+          "default": 60,
+          "description": "Extra timeout seconds per nesting level"
+        },
+        "on_error": {
+          "type": "string",
+          "enum": ["stop", "rollback", "continue"],
+          "default": "stop",
+          "description": "Error handling: stop (halt), rollback (destroy created), continue (skip failed)"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

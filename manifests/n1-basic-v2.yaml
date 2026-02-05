@@ -1,0 +1,11 @@
+schema_version: 2
+name: n1-basic-v2
+description: "1-level Test VM (v2 graph format)"
+pattern: flat
+
+nodes:
+  - name: edge
+    type: vm
+    preset: vm-small
+    image: debian-12
+    vmid: 99001
