@@ -90,7 +90,7 @@ father (pve, physical)
 v2/
 ├── defs/                  # Schema definitions
 │   ├── spec.schema.json   # JSON Schema for specifications
-│   ├── node.schema.json   # JSON Schema for nodes
+│   ├── manifest.schema.json # JSON Schema for v2 manifests
 │   └── posture.schema.json # JSON Schema for postures
 ├── specs/                 # Specifications (what to become)
 │   ├── pve.yaml           # PVE host specification
@@ -100,26 +100,25 @@ v2/
 │   ├── stage.yaml         # site_token auth
 │   ├── prod.yaml          # node_token auth
 │   └── local.yaml         # network trust (on-box)
-├── presets/               # Size presets (with vm- prefix)
-│   ├── vm-xsmall.yaml
-│   ├── vm-small.yaml
-│   ├── vm-medium.yaml
-│   ├── vm-large.yaml
-│   └── vm-xlarge.yaml
-└── nodes/                 # Node templates (infrastructure)
-    ├── pve.yaml           # type: vm, spec: pve (nested PVE)
-    └── base.yaml          # type: vm, spec: base
+└── presets/               # Size presets (with vm- prefix)
+    ├── vm-xsmall.yaml
+    ├── vm-small.yaml
+    ├── vm-medium.yaml
+    ├── vm-large.yaml
+    └── vm-xlarge.yaml
 ```
 
+**Note:** `v2/nodes/` was removed in v0.46. Node properties (type, spec, preset, image, disk) are now defined inline in manifest v2 `nodes[]` entries.
+
 **Lifecycle coverage:**
-- **create**: `v2/nodes/` + `v2/presets/` (infrastructure provisioning)
+- **create**: `v2/presets/` + manifest `nodes[]` (infrastructure provisioning)
 - **config**: `v2/specs/` + `v2/postures/` (fetch spec, apply configuration)
 
 **Design rationale:**
 - v2 is self-contained, can evolve independently of v1
 - `secrets.yaml` remains shared (site-wide sensitive values)
 - `presets/` uses `vm-` prefix to allow future preset types (e.g., `network-`)
-- Unified node model supports VM, CT, PVE, and future k3s nodes
+- Node definitions live in manifests, not standalone files
 
 ### v2/specs/{name}.yaml
 
@@ -140,61 +139,6 @@ Schema: `v2/defs/spec.schema.json`
 **FK resolution (runtime):**
 - `access.posture` → `v2/postures/{value}.yaml`
 - `access.users[].ssh_keys[]` → `secrets.yaml → ssh_keys.{value}`
-
-### v2/nodes/{name}.yaml
-
-Node templates define infrastructure for compute nodes. Each node has a `type` that determines its characteristics.
-
-Schema: `v2/defs/node.schema.json`
-
-| Field | Required | Description |
-|-------|----------|-------------|
-| `type` | Yes | Node type: `vm`, `ct`, `pve`, `k3s` |
-| `spec` | No | FK to specs/ - what this node should become |
-| `parent` | No | Parent node this runs on (for vm/ct/k3s) |
-| `preset` | No | FK to presets/ - size preset |
-| `image` | Yes (vm) | Cloud image for VM nodes |
-| `template` | Yes (ct) | OS template for CT nodes |
-| `cores`, `memory`, `disk` | No | Resource overrides |
-
-**Type-specific fields:**
-
-| Field | vm | ct | pve |
-|-------|----|----|-----|
-| `image` | ✓ | - | - |
-| `template` | - | ✓ | - |
-| `unprivileged` | - | ✓ | - |
-| `features` | - | ✓ | - |
-| `hardware` | - | - | ✓ |
-| `access.api` | - | - | ✓ |
-
-**Example (VM node):**
-```yaml
-type: vm
-spec: pve
-image: debian-13-pve
-preset: vm-large
-disk: 64
-```
-
-**Example (PVE node - future):**
-```yaml
-type: pve
-spec: pve
-hardware:
-  cpu_cores: 16
-  memory_gb: 64
-network:
-  interfaces:
-    vmbr0:
-      address: 10.0.12.61/24
-access:
-  ssh:
-    user: root
-  api:
-    endpoint: https://10.0.12.61:8006
-    token: father
-```
 
 ### Auth Model (Config Phase)
 
@@ -426,7 +370,27 @@ Schema v1 fields:
   - `cleanup_on_failure` - Destroy on failure (default: true)
   - `timeout_buffer` - Extra timeout per level (default: 60)
 
-Built-in manifests: `n1-basic` (1 level), `n2-quick` (2 levels), `n3-full` (3 levels)
+Built-in v1 manifests: `n1-basic` (1 level), `n2-quick` (2 levels), `n3-full` (3 levels)
+
+Schema v2 fields (v0.46+):
+- `schema_version` - Must be 2 for graph-based nodes format
+- `name` - Manifest identifier
+- `description` - Human-readable description
+- `pattern` - Topology shape: `flat` or `tiered`
+- `nodes[]` - List of graph nodes:
+  - `name` - Node identifier (VM hostname)
+  - `type` - Node type: `vm`, `ct`, `pve`
+  - `spec` - FK to v2/specs/
+  - `preset` - FK to v2/presets/ (vm- prefixed)
+  - `image` - Cloud image name
+  - `vmid` - Explicit VM ID
+  - `disk` - Disk size override
+  - `parent` - FK to another node name (null/omitted = root)
+  - `execution.mode` - Per-node execution mode (push/pull)
+- `settings` - Optional settings (same as v1, plus `on_error`)
+  - `on_error` - Error handling: `stop`, `rollback`, `continue` (default: stop)
+
+Built-in v2 manifests: `n1-basic-v2` (flat), `n2-quick-v2` (tiered 2-level), `n3-full-v2` (tiered 3-level)
 
 ## Discovery Mechanism
 

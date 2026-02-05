@@ -4,6 +4,12 @@
 
 ### Added
 - Add CI workflow with YAML validation (homestak-dev#190)
+- Add manifest schema v2 JSON Schema at `v2/defs/manifest.schema.json` (iac-driver#143)
+- Add v2 sample manifests: `n1-basic-v2.yaml`, `n2-quick-v2.yaml`, `n3-full-v2.yaml` (iac-driver#143)
+
+### Removed
+- Remove `v2/nodes/` directory and `v2/defs/node.schema.json` (iac-driver#143)
+  - Node properties absorbed into manifest schema v2
 
 ## v0.45 - 2026-02-02
 
