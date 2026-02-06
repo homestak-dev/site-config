@@ -1,0 +1,16 @@
+# Pull mode test environment (node-agnostic template)
+# Primary key derived from filename: pull-test.yaml -> pull-test
+# Node specified at deploy time via: run.sh --host <name>
+#
+# VM name "edge" maps to v2/specs/edge.yaml for spec resolution.
+# Used by spec-vm-pull-roundtrip scenario (iac-driver#156).
+---
+# Security posture: FK -> postures/dev.yaml
+posture: dev
+
+# VM ID allocation: base + index
+vmid_base: 99950
+
+vms:
+  - name: edge
+    template: test
