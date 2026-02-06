@@ -239,7 +239,7 @@ else
 
     if [[ "$JSON_OUTPUT" != "true" ]]; then
         echo ""
-        echo "Results: ${GREEN}$PASSED passed${NC}, ${RED}$FAILED invalid${NC}, ${RED}$ERRORS errors${NC}"
+        echo -e "Results: ${GREEN}$PASSED passed${NC}, ${RED}$FAILED invalid${NC}, ${RED}$ERRORS errors${NC}"
     fi
 fi
 
