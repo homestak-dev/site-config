@@ -2,7 +2,24 @@
 
 ## Unreleased
 
+### Fixed
+- Fix `validate-schemas.sh` exit code in `--json` mode (bootstrap#40)
+  - JSON mode now correctly exits 1 for invalid files (was exiting 0)
+
+### Changed
+- Update `defaults.spec_server` from HTTP to HTTPS (bootstrap#38)
+  - Controller uses HTTPS with self-signed TLS certs
+
 ### Added
+- Add `scripts/validate-schemas.sh` for schema validation (bootstrap#40)
+  - Validates specs, postures, and v2 manifests against JSON schemas
+  - Supports `--json` output and individual file paths
+  - Integrated into `make validate` (runs after YAML syntax check)
+- Add bats tests for `validate-schemas.sh` (bootstrap#40)
+  - 17 tests: valid/invalid files, JSON output, schema resolution, mixed results
+  - `make test` target runs bats test suite
+- Add `python3-jsonschema` to CI workflow (bootstrap#40)
+  - Schema validation now runs in CI (previously silently skipped)
 - Add CI workflow with YAML validation (homestak-dev#190)
 - Add manifest schema v2 JSON Schema at `v2/defs/manifest.schema.json` (iac-driver#143)
 - Add v2 sample manifests: `n1-basic-v2.yaml`, `n2-quick-v2.yaml`, `n3-full-v2.yaml` (iac-driver#143)

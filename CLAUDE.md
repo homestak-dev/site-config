@@ -438,8 +438,37 @@ make setup    # Configure git hooks, check dependencies
 make encrypt  # Encrypt secrets.yaml -> secrets.yaml.enc
 make decrypt  # Decrypt secrets.yaml.enc -> secrets.yaml
 make check    # Show setup status
-make validate # Validate YAML syntax
+make validate # Validate YAML syntax + schemas
 ```
+
+### Schema Validation
+
+The `scripts/validate-schemas.sh` script validates YAML files against JSON schemas:
+
+```bash
+# Validate all specs, postures, and v2 manifests
+./scripts/validate-schemas.sh
+
+# Validate specific files
+./scripts/validate-schemas.sh v2/specs/pve.yaml v2/postures/dev.yaml
+
+# JSON output for CI/scripting
+./scripts/validate-schemas.sh --json
+```
+
+**Schema mapping:**
+| Directory | Schema |
+|-----------|--------|
+| `v2/specs/*.yaml` | `v2/defs/spec.schema.json` |
+| `v2/postures/*.yaml` | `v2/defs/posture.schema.json` |
+| `manifests/*.yaml` (v2) | `v2/defs/manifest.schema.json` |
+
+**Exit codes:**
+- `0` - All files valid
+- `1` - One or more files invalid
+- `2` - Error (missing schema, dependency, etc.)
+
+Requires `python3-jsonschema` (apt install python3-jsonschema).
 
 ### Git Hooks
 - **pre-commit**: Auto-encrypts secrets.yaml, blocks plaintext commits

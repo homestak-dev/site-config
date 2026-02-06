@@ -32,4 +32,4 @@ defaults:
   # Empty string means spec discovery disabled
   # Use FQDN (not short hostname) - VMs resolve via DNS search domain
   # Note: HTTP (not HTTPS) - server uses Python HTTPServer
-  spec_server: "http://father.core:44443"
+  spec_server: "https://father.core:44443"
