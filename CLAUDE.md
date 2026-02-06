@@ -370,8 +370,6 @@ Schema v1 fields:
   - `cleanup_on_failure` - Destroy on failure (default: true)
   - `timeout_buffer` - Extra timeout per level (default: 60)
 
-Built-in v1 manifests: `n1-basic` (1 level), `n2-quick` (2 levels), `n3-full` (3 levels)
-
 Schema v2 fields (v0.46+):
 - `schema_version` - Must be 2 for graph-based nodes format
 - `name` - Manifest identifier
@@ -390,7 +388,7 @@ Schema v2 fields (v0.46+):
 - `settings` - Optional settings (same as v1, plus `on_error`)
   - `on_error` - Error handling: `stop`, `rollback`, `continue` (default: stop)
 
-Built-in v2 manifests: `n1-basic-v2` (flat), `n2-quick-v2` (tiered 2-level), `n3-full-v2` (tiered 3-level)
+Built-in manifests: `n1-basic` (flat), `n2-quick` (tiered 2-level), `n3-full` (tiered 3-level)
 
 ## Discovery Mechanism
 

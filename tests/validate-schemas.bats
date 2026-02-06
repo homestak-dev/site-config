@@ -108,25 +108,23 @@ EOF
 
 # --- Manifest validation ---
 
-@test "validates v2 manifests and skips v1 (default mode)" {
+@test "validates all manifests (default mode)" {
     run "$SCRIPT"
     [ "$status" -eq 0 ]
-    # v1 manifests should be skipped
-    [[ "$output" == *"skipped"* ]] || true
 }
 
-@test "validates a specific v2 manifest" {
-    local v2_manifest=""
-    for f in "$SITE_CONFIG_DIR"/manifests/*-v2.yaml; do
+@test "validates a specific manifest" {
+    local manifest=""
+    for f in "$SITE_CONFIG_DIR"/manifests/*.yaml; do
         if [ -f "$f" ]; then
-            v2_manifest="$f"
+            manifest="$f"
             break
         fi
     done
-    if [ -z "$v2_manifest" ]; then
-        skip "no v2 manifests found"
+    if [ -z "$manifest" ]; then
+        skip "no manifests found"
     fi
-    run "$SCRIPT" "$v2_manifest"
+    run "$SCRIPT" "$manifest"
     [ "$status" -eq 0 ]
 }
 

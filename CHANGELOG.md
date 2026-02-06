@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Removed
+- Remove v1 manifests: `n1-basic.yaml`, `n2-quick.yaml`, `n3-full.yaml` (#51)
+  - v1 schema (linear `levels[]`) deprecated per REQ-ORC-004
+
+### Changed
+- Rename v2 manifests: drop `-v2` suffix (#51)
+  - `n1-basic-v2.yaml` → `n1-basic.yaml`
+  - `n2-quick-v2.yaml` → `n2-quick.yaml`
+  - `n3-full-v2.yaml` → `n3-full.yaml`
+
 ### Fixed
 - Fix `validate-schemas.sh` exit code in `--json` mode (bootstrap#40)
   - JSON mode now correctly exits 1 for invalid files (was exiting 0)

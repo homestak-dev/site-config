@@ -1,0 +1,23 @@
+---
+# Single VM with pull execution mode.
+# Used by spec-vm-pull-roundtrip integration test (iac-driver#156).
+#
+# The VM self-configures via cloud-init:
+#   1. homestak spec get (fetch spec from controller)
+#   2. ./run.sh config (apply spec via ansible)
+#   3. config-complete.json marker written
+#
+# The operator polls for the marker instead of SSH-based push.
+
+schema_version: 2
+name: n1-pull
+description: Single VM with pull execution mode for integration testing
+pattern: flat
+nodes:
+  - name: edge
+    type: vm
+    preset: vm-small
+    image: debian-12
+    vmid: 99950
+    execution:
+      mode: pull
