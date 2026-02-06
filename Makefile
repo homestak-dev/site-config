@@ -10,7 +10,7 @@
 
 SOPS_VERSION := 3.11.0
 
-.PHONY: help setup install-deps decrypt encrypt clean check validate host-config node-config
+.PHONY: help setup install-deps decrypt encrypt clean check validate test lint host-config node-config
 
 help:
 	@echo "site-config - Site-specific configuration management"
@@ -30,7 +30,7 @@ help:
 	@echo "  make check       - Verify encryption setup"
 	@echo ""
 	@echo "Validation:"
-	@echo "  make validate    - Validate YAML syntax (optional)"
+	@echo "  make validate    - Validate YAML syntax + schemas"
 	@echo ""
 	@echo "Prerequisites: Run 'sudo make install-deps' or install manually:"
 	@echo "  - age:  apt install age"
@@ -159,7 +159,18 @@ validate:
 	@if [ -f secrets.yaml ]; then \
 		python3 -c "import yaml; yaml.safe_load(open('secrets.yaml'))" 2>/dev/null && echo "  secrets.yaml: OK" || echo "  secrets.yaml: INVALID"; \
 	fi
-	@echo "Done."
+	@echo ""
+	@if command -v python3 >/dev/null 2>&1 && python3 -c "import jsonschema" 2>/dev/null; then \
+		./scripts/validate-schemas.sh; \
+	else \
+		echo "Schema validation skipped (python3-jsonschema not installed)"; \
+	fi
+
+test:
+	@bats tests/
+
+lint:
+	@shellcheck scripts/*.sh
 
 host-config:
 	@HOSTNAME=$$(hostname -s); \
