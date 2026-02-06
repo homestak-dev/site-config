@@ -1,39 +1,26 @@
-# Full 3-level nested PVE validation
-# Proves recursive architecture scales beyond N=2
-#
-# Topology:
-#   host -> root-pve (L1) -> leaf-pve (L2) -> test (L3)
----
-schema_version: 1
+schema_version: 2
 name: n3-full
 description: "3-level Root PVE + Leaf PVE + Test VM"
+pattern: tiered
 
-levels:
+nodes:
   - name: root-pve
-    vm_preset: large
-    vmid: 99011
+    type: pve
+    preset: vm-large
     image: debian-13-pve
-    post_scenario: pve-setup
-    post_scenario_args:
-      - "--local"
-      - "--skip-preflight"
+    vmid: 99011
+    disk: 64
 
   - name: leaf-pve
-    vm_preset: medium
-    vmid: 99021
+    type: pve
+    preset: vm-medium
     image: debian-13-pve
-    post_scenario: pve-setup
-    post_scenario_args:
-      - "--local"
-      - "--skip-preflight"
+    vmid: 99021
+    parent: root-pve
 
-  - name: test
-    vm_preset: small
-    vmid: 99031
+  - name: edge
+    type: vm
+    preset: vm-small
     image: debian-12
-    post_scenario: null
-
-settings:
-  verify_ssh: true
-  cleanup_on_failure: true
-  timeout_buffer: 60
+    vmid: 99031
+    parent: leaf-pve

@@ -1,30 +1,19 @@
-# Quick 2-level nested PVE test
-# Equivalent to current nested-pve scenarios
-#
-# Topology:
-#   host -> nested-pve (L1) -> test (L2)
----
-schema_version: 1
+schema_version: 2
 name: n2-quick
 description: "2-level Nested PVE + Test VM"
+pattern: tiered
 
-levels:
-  - name: nested-pve
-    vm_preset: large
-    vmid: 99011
+nodes:
+  - name: root-pve
+    type: pve
+    preset: vm-large
     image: debian-13-pve
-    post_scenario: pve-setup
-    post_scenario_args:
-      - "--local"
-      - "--skip-preflight"
+    vmid: 99011
+    disk: 64
 
-  - name: test
-    vm_preset: medium
-    vmid: 99021
+  - name: edge
+    type: vm
+    preset: vm-medium
     image: debian-12
-    post_scenario: null
-
-settings:
-  verify_ssh: true
-  cleanup_on_failure: true
-  timeout_buffer: 60
+    vmid: 99021
+    parent: root-pve
