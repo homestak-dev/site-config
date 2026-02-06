@@ -14,9 +14,9 @@ name: n1-pull
 description: Single VM with pull execution mode for integration testing
 pattern: flat
 nodes:
-  - name: pull-test
+  - name: edge
     type: vm
-    preset: vm-medium
+    preset: vm-small
     image: debian-12
     vmid: 99950
     execution:

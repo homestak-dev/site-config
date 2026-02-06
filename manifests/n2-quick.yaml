@@ -13,7 +13,7 @@ nodes:
 
   - name: edge
     type: vm
-    preset: vm-medium
+    preset: vm-small
     image: debian-12
     vmid: 99021
     parent: root-pve

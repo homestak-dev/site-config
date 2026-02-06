@@ -1,5 +1,5 @@
-# Pull mode integration test specification
-# Used by spec-vm-pull-roundtrip scenario (iac-driver#156)
+# Edge VM specification
+# Simple Debian endpoint: packages, user with sudo, timezone
 ---
 schema_version: 1
 
