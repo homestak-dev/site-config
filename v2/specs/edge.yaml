@@ -9,7 +9,7 @@ access:
     - name: homestak
       sudo: true
       ssh_keys:
-        - ssh_keys.jderose
+        - ssh_keys.root@father
 
 platform:
   packages:
