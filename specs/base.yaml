@@ -1,7 +1,20 @@
-# Minimal Debian VM specification
-# Baseline for simple VMs with default packages only
+# General-purpose VM specification
+# Debian endpoint: packages, user with sudo, timezone
 ---
 schema_version: 1
 
+access:
+  posture: dev
+  users:
+    - name: homestak
+      sudo: true
+      ssh_keys:
+        - ssh_keys.jderose@father
+
 platform:
-  packages: []
+  packages:
+    - htop
+    - curl
+
+config:
+  timezone: America/Denver

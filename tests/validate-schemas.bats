@@ -34,7 +34,7 @@ teardown() {
 # --- Valid file validation ---
 
 @test "validates a valid spec file" {
-    run "$SCRIPT" "$SITE_CONFIG_DIR/specs/test.yaml"
+    run "$SCRIPT" "$SITE_CONFIG_DIR/specs/base.yaml"
     [ "$status" -eq 0 ]
 }
 
@@ -52,7 +52,7 @@ teardown() {
 # --- JSON output ---
 
 @test "--json outputs valid JSON for a valid file" {
-    run "$SCRIPT" --json "$SITE_CONFIG_DIR/specs/test.yaml"
+    run "$SCRIPT" --json "$SITE_CONFIG_DIR/specs/base.yaml"
     [ "$status" -eq 0 ]
     echo "$output" | python3 -c "import sys,json; d=json.load(sys.stdin); assert d['valid']==True"
 }
@@ -132,14 +132,14 @@ EOF
 
 @test "validates multiple files in one invocation" {
     run "$SCRIPT" \
-        "$SITE_CONFIG_DIR/specs/test.yaml" \
+        "$SITE_CONFIG_DIR/specs/base.yaml" \
         "$SITE_CONFIG_DIR/postures/dev.yaml"
     [ "$status" -eq 0 ]
 }
 
 @test "mixed results: valid + not found exits non-zero" {
     run "$SCRIPT" \
-        "$SITE_CONFIG_DIR/specs/test.yaml" \
+        "$SITE_CONFIG_DIR/specs/base.yaml" \
         "/nonexistent/file.yaml"
     [ "$status" -ne 0 ]
 }
@@ -149,7 +149,7 @@ EOF
 schema_version: 999
 EOF
     run "$SCRIPT" \
-        "$SITE_CONFIG_DIR/specs/test.yaml" \
+        "$SITE_CONFIG_DIR/specs/base.yaml" \
         "$SITE_CONFIG_DIR/specs/_test_invalid.yaml"
     [ "$status" -eq 1 ]
 }

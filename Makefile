@@ -6,7 +6,7 @@
 #   site.yaml        - Non-sensitive defaults
 #   hosts/*.yaml     - Physical machine config
 #   nodes/*.yaml     - PVE instance config
-#   envs/*.yaml      - Deployment config
+#   specs/*.yaml     - Node specifications
 
 SOPS_VERSION := 3.11.0
 
@@ -147,11 +147,11 @@ check:
 	@printf "  site.yaml:   " && ([ -f site.yaml ] && echo "EXISTS" || echo "NOT FOUND")
 	@printf "  hosts/:      " && (ls -1 hosts/*.yaml 2>/dev/null | wc -l | xargs printf "%s files\n")
 	@printf "  nodes/:      " && (ls -1 nodes/*.yaml 2>/dev/null | wc -l | xargs printf "%s files\n")
-	@printf "  envs/:       " && (ls -1 envs/*.yaml 2>/dev/null | wc -l | xargs printf "%s files\n")
+	@printf "  specs/:      " && (ls -1 specs/*.yaml 2>/dev/null | wc -l | xargs printf "%s files\n")
 
 validate:
 	@echo "Validating YAML syntax..."
-	@for f in site.yaml hosts/*.yaml nodes/*.yaml envs/*.yaml; do \
+	@for f in site.yaml hosts/*.yaml nodes/*.yaml specs/*.yaml; do \
 		if [ -f "$$f" ]; then \
 			python3 -c "import yaml; yaml.safe_load(open('$$f'))" 2>/dev/null && echo "  $$f: OK" || echo "  $$f: INVALID"; \
 		fi; \

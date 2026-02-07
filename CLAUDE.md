@@ -4,28 +4,27 @@ This file provides guidance to Claude Code when working with this repository.
 
 ## Overview
 
-Site-specific configuration for homestak deployments using a normalized 5-entity YAML structure. Separates concerns: physical machines, PVE instances, VM templates, security postures, and deployment topologies.
+Site-specific configuration for homestak deployments. Separates concerns: physical machines, PVE instances, security postures, size presets, node specifications, and deployment manifests.
 
-## Entity Model (5NF)
+## Entity Model
 
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   hosts/    │     │  postures/  │     │    vms/     │
-│ (physical)  │     │ (security)  │     │ (templates) │
-│  Ansible    │     │   Ansible   │     │ Tofu/Packer │
+│   hosts/    │     │  postures/  │     │   specs/    │
+│ (physical)  │     │ (security)  │     │ (what to    │
+│  Ansible    │     │   Ansible   │     │   become)   │
 └──────┬──────┘     └──────┬──────┘     └──────┬──────┘
        │                   │                   │
-       │ FK: host          │ FK: posture       │ FK: vm
+       │ FK: host          │ FK: posture       │ FK: spec
        ▼                   ▼                   ▼
-┌─────────────┐     ┌─────────────┐
-│   nodes/    │◄────│   envs/     │
-│  (PVE API)  │     │ (templates) │
-│    Tofu     │     │    Tofu     │
-└─────────────┘     └─────────────┘
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   nodes/    │◄────│ manifests/  │────▶│  presets/   │
+│  (PVE API)  │     │ (topology)  │     │ (VM sizes)  │
+│    Tofu     │     │  Operator   │     │    Tofu     │
+└─────────────┘     └─────────────┘     └─────────────┘
 ```
 
 **Note:** Primary keys are derived from filenames (e.g., `hosts/father.yaml` → identifier is `father`).
-Envs are node-agnostic templates; the target host is specified at deploy time via `run.sh --host`.
 Foreign keys (FK) are explicit references between entities.
 
 ## Structure
@@ -50,20 +49,14 @@ site-config/
 │   ├── prod.yaml          # node_token auth, hardened SSH
 │   └── local.yaml         # network trust (on-box)
 ├── specs/                 # Node specifications (what to become)
-│   ├── pve.yaml           # PVE host specification
-│   └── base.yaml          # Minimal Debian specification
+│   ├── base.yaml          # General-purpose VM (user, packages, timezone)
+│   └── pve.yaml           # PVE hypervisor (proxmox packages, services)
 ├── presets/               # Size presets (vm- prefix)
 │   ├── vm-xsmall.yaml
 │   ├── vm-small.yaml
 │   ├── vm-medium.yaml
 │   ├── vm-large.yaml
 │   └── vm-xlarge.yaml
-├── vms/                   # VM templates (legacy, used by envs/)
-│   └── {name}.yaml        # Custom templates
-├── envs/                  # Deployment topology templates (node-agnostic)
-│   ├── dev.yaml           # env-specific config, node at deploy time
-│   ├── test.yaml
-│   └── ansible-test.yaml  # Ansible role validation
 └── manifests/             # Manifest definitions (v0.39+)
     ├── n1-basic.yaml      # Flat single-node test
     ├── n2-quick.yaml      # 2-level nested PVE test
@@ -111,6 +104,13 @@ Schema: `defs/spec.schema.json`
 **FK resolution (runtime):**
 - `access.posture` → `postures/{value}.yaml`
 - `access.users[].ssh_keys[]` → `secrets.yaml → ssh_keys.{value}`
+
+**Available specs:**
+
+| Spec | Purpose |
+|------|---------|
+| `base` | General-purpose VM: user with sudo, ssh keys, packages, timezone |
+| `pve` | PVE hypervisor: proxmox packages, services, PVE config |
 
 ### Auth Model (Config Phase)
 
@@ -252,7 +252,7 @@ make node-config FORCE=1
 ### postures/{name}.yaml
 Security posture configuration with nested structure and auth model.
 Primary key derived from filename (e.g., `dev.yaml` → `dev`).
-Referenced by envs via `posture:` FK and specs via `access.posture:` FK.
+Referenced by specs via `access.posture:` FK.
 
 Schema: `defs/posture.schema.json`
 
@@ -279,59 +279,11 @@ Primary key derived from filename (e.g., `vm-small.yaml` → `vm-small`).
 
 Available presets: `vm-xsmall` (1c/1GB/8GB), `vm-small` (2c/2GB/10GB), `vm-medium` (2c/4GB/20GB), `vm-large` (4c/8GB/40GB), `vm-xlarge` (8c/16GB/64GB)
 
-### vms/{name}.yaml
-VM template defining base configuration (used by envs/).
-Primary key derived from filename (e.g., `nested-pve.yaml` → `nested-pve`).
-- `image` - Base image name (FK to packer image)
-- `preset` - FK to presets/ (optional, for resource inheritance)
-- `cores` - CPU cores (overrides preset)
-- `memory` - RAM in MB (overrides preset)
-- `disk` - Disk size in GB (overrides preset)
-- `bridge` - Network bridge (optional, defaults from site.yaml)
-- `ip` - IP address or "dhcp" (optional)
-- `gateway` - Gateway IP for static IPs (optional, defaults from site.yaml)
-- `packages` - Cloud-init packages (optional)
-
-**Merge order:** preset → template → instance overrides
-
-### envs/{name}.yaml
-Deployment topology template defining VM layouts.
-Primary key derived from filename (e.g., `dev.yaml` → `dev`).
-Node-agnostic: target host specified at deploy time via `run.sh --host`.
-- `posture` - FK to postures/ (default: dev)
-- `vmid_base` - Base VM ID for auto-allocation (omit for PVE auto-assign)
-- `vms[]` - List of VM instances:
-  - `name` - VM hostname
-  - `template` - FK to vms/ template
-  - `vmid` - Explicit VM ID (overrides vmid_base + index)
-  - (any template field can be overridden per-instance)
-
-### manifests/{name}.yaml (v0.39+)
-Manifest definitions for recursive-pve scenarios.
+### manifests/{name}.yaml
+Manifest definitions for infrastructure orchestration.
 Primary key derived from filename (e.g., `n2-quick.yaml` → `n2-quick`).
 
-**Level modes (v0.41+):**
-- **env mode**: `env` FK references envs/ (traditional)
-- **vm_preset mode**: `vm_preset` + `vmid` + `image` (simpler, FK to presets/)
-
-Schema v1 fields:
-- `schema_version` - Always 1 for linear levels format
-- `name` - Manifest identifier
-- `description` - Human-readable description
-- `levels[]` - List of nesting levels:
-  - `name` - Level identifier (used in context keys)
-  - `env` - FK to envs/ (env mode)
-  - `vm_preset` - FK to vms/presets/ (vm_preset mode)
-  - `vmid` - Explicit VM ID (required for vm_preset mode)
-  - `image` - Image name (required for vm_preset mode, optional override for env mode)
-  - `post_scenario` - Scenario to run after level is up (e.g., `pve-setup`)
-  - `post_scenario_args` - Arguments for post_scenario
-- `settings` - Optional settings:
-  - `verify_ssh` - Verify SSH access at each level (default: true)
-  - `cleanup_on_failure` - Destroy on failure (default: true)
-  - `timeout_buffer` - Extra timeout per level (default: 60)
-
-Schema v2 fields (v0.46+):
+Schema v2 fields:
 - `schema_version` - Must be 2 for graph-based nodes format
 - `name` - Manifest identifier
 - `description` - Human-readable description
@@ -349,7 +301,7 @@ Schema v2 fields (v0.46+):
 - `settings` - Optional settings (same as v1, plus `on_error`)
   - `on_error` - Error handling: `stop`, `rollback`, `continue` (default: stop)
 
-Built-in manifests: `n1-basic` (flat), `n2-quick` (tiered 2-level), `n3-full` (tiered 3-level)
+Built-in manifests: `n1-basic` (flat), `n1-pull` (flat, pull mode), `n2-quick` (tiered 2-level), `n3-full` (tiered 3-level)
 
 ## Discovery Mechanism
 

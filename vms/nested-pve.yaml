@@ -1,6 +1,0 @@
-# Nested PVE VM template
-# Uses PVE-ready image with pre-installed packages
-image: debian-13-pve
-cores: 2
-memory: 8192
-disk: 64

@@ -6,6 +6,7 @@ pattern: tiered
 nodes:
   - name: root-pve
     type: pve
+    spec: pve
     preset: vm-large
     image: debian-13-pve
     vmid: 99011
@@ -13,6 +14,7 @@ nodes:
 
   - name: edge
     type: vm
+    spec: base
     preset: vm-small
     image: debian-12
     vmid: 99021

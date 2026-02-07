@@ -57,7 +57,7 @@
           },
           "spec": {
             "type": "string",
-            "description": "FK to v2/specs/{value}.yaml - what this node should become"
+            "description": "FK to specs/{value}.yaml - what this node should become"
           },
           "preset": {
             "type": "string",
