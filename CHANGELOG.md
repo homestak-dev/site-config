@@ -2,7 +2,19 @@
 
 ## Unreleased
 
+### Changed
+- Consolidate `v2/` into top-level directories (#53)
+  - `v2/postures/` → `postures/` (replaces v1 flat postures with nested format + auth model)
+  - `v2/specs/` → `specs/`
+  - `v2/presets/` → `presets/` (vm- prefixed)
+  - `v2/defs/` → `defs/`
+  - `v2/` directory retired
+- Update `vms/test.yaml` and `vms/test13.yaml` preset ref: `small` → `vm-small` (#53)
+- Update `validate-schemas.sh` paths from `v2/` prefix to top-level (#53)
+
 ### Removed
+- Delete `vms/presets/` (superseded by top-level `presets/` with vm- prefix) (#53)
+- Delete dead artifacts: `envs/k8s.yaml`, `vms/nested-pve-light.yaml` (#53)
 - Remove v1 manifests: `n1-basic.yaml`, `n2-quick.yaml`, `n3-full.yaml` (#51)
   - v1 schema (linear `levels[]`) deprecated per REQ-ORC-004
 

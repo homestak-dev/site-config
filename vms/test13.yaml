@@ -1,5 +1,5 @@
 # Test VM template - Debian 13 Trixie
 # For ansible community role testing
 image: debian-13
-preset: small
+preset: vm-small
 disk: 10

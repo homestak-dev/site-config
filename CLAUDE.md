@@ -35,33 +35,48 @@ site-config/
 ├── site.yaml              # Non-sensitive site-wide defaults
 ├── secrets.yaml           # ALL sensitive values (SOPS encrypted)
 ├── secrets.yaml.enc       # Encrypted version (committed to private forks)
+├── defs/                  # JSON Schema definitions
+│   ├── spec.schema.json
+│   ├── posture.schema.json
+│   └── manifest.schema.json
 ├── hosts/                 # Physical machines
 │   └── {name}.yaml        # SSH access (Phase 4: network, storage)
 ├── nodes/                 # PVE instances (filename must match PVE node name)
 │   ├── {nodename}.yaml    # e.g., father.yaml for node named "father"
 │   └── nested-pve.yaml    # Nested PVE (parent_node reference)
-├── postures/              # Security postures for environments
-│   ├── dev.yaml           # Permissive: SSH password auth, sudo nopasswd
-│   ├── prod.yaml          # Hardened: no root login, fail2ban enabled
-│   └── local.yaml         # On-box execution posture
-├── vms/                   # VM templates
-│   ├── presets/           # Size presets (small, medium, large)
-│   │   └── {size}.yaml
+├── postures/              # Security postures with auth model
+│   ├── dev.yaml           # network trust, permissive SSH
+│   ├── stage.yaml         # site_token auth, hardened SSH
+│   ├── prod.yaml          # node_token auth, hardened SSH
+│   └── local.yaml         # network trust (on-box)
+├── specs/                 # Node specifications (what to become)
+│   ├── pve.yaml           # PVE host specification
+│   └── base.yaml          # Minimal Debian specification
+├── presets/               # Size presets (vm- prefix)
+│   ├── vm-xsmall.yaml
+│   ├── vm-small.yaml
+│   ├── vm-medium.yaml
+│   ├── vm-large.yaml
+│   └── vm-xlarge.yaml
+├── vms/                   # VM templates (legacy, used by envs/)
 │   └── {name}.yaml        # Custom templates
 ├── envs/                  # Deployment topology templates (node-agnostic)
 │   ├── dev.yaml           # env-specific config, node at deploy time
 │   ├── test.yaml
-│   ├── k8s.yaml
-│   ├── ansible-test.yaml  # Ansible role validation
-│   └── nested-pve.yaml    # Integration testing
-└── manifests/             # Recursive scenario manifests (v0.39+)
+│   └── ansible-test.yaml  # Ansible role validation
+└── manifests/             # Manifest definitions (v0.39+)
+    ├── n1-basic.yaml      # Flat single-node test
     ├── n2-quick.yaml      # 2-level nested PVE test
     └── n3-full.yaml       # 3-level nested PVE test
 ```
 
-## v2 Structure (v0.45+)
+## Lifecycle Configuration
 
-The `v2/` directory contains the next-generation lifecycle configuration for the create → config → run → destroy model. It is self-contained, replicating entities from v1 that are needed for lifecycle phases.
+Configuration for the create → config → run → destroy lifecycle model. Previously in `v2/`, now consolidated at the top level.
+
+**Lifecycle coverage:**
+- **create**: `presets/` + manifest `nodes[]` (infrastructure provisioning)
+- **config**: `specs/` + `postures/` (fetch spec, apply configuration)
 
 ### Unified Node Model
 
@@ -75,56 +90,13 @@ node (abstract)
 └── type: k3s     → Kubernetes node (future)
 ```
 
-**Parent-child topology:**
-```
-father (pve, physical)
-├── dev1 (vm, parent: father)
-├── dev2 (ct, parent: father)
-└── nested-pve (vm, parent: father)
-    └── test1 (vm, parent: nested-pve)
-```
+Node properties (type, spec, preset, image, disk) are defined inline in manifest `nodes[]` entries.
 
-### Directory Structure
+### specs/{name}.yaml
 
-```
-v2/
-├── defs/                  # Schema definitions
-│   ├── spec.schema.json   # JSON Schema for specifications
-│   ├── manifest.schema.json # JSON Schema for v2 manifests
-│   └── posture.schema.json # JSON Schema for postures
-├── specs/                 # Specifications (what to become)
-│   ├── pve.yaml           # PVE host specification
-│   └── base.yaml          # Minimal Debian specification
-├── postures/              # Security postures with auth model
-│   ├── dev.yaml           # network trust
-│   ├── stage.yaml         # site_token auth
-│   ├── prod.yaml          # node_token auth
-│   └── local.yaml         # network trust (on-box)
-└── presets/               # Size presets (with vm- prefix)
-    ├── vm-xsmall.yaml
-    ├── vm-small.yaml
-    ├── vm-medium.yaml
-    ├── vm-large.yaml
-    └── vm-xlarge.yaml
-```
+Specifications define "what a node should become" - packages, services, users, configuration. Consumed by `homestak spec get` (config phase) and `./run.sh config` (config phase).
 
-**Note:** `v2/nodes/` was removed in v0.46. Node properties (type, spec, preset, image, disk) are now defined inline in manifest v2 `nodes[]` entries.
-
-**Lifecycle coverage:**
-- **create**: `v2/presets/` + manifest `nodes[]` (infrastructure provisioning)
-- **config**: `v2/specs/` + `v2/postures/` (fetch spec, apply configuration)
-
-**Design rationale:**
-- v2 is self-contained, can evolve independently of v1
-- `secrets.yaml` remains shared (site-wide sensitive values)
-- `presets/` uses `vm-` prefix to allow future preset types (e.g., `network-`)
-- Node definitions live in manifests, not standalone files
-
-### v2/specs/{name}.yaml
-
-Specifications define "what a node should become" - packages, services, users, configuration. Consumed by `homestak spec get` (config phase) and `homestak config` (config phase).
-
-Schema: `v2/defs/spec.schema.json`
+Schema: `defs/spec.schema.json`
 
 | Section | Required | Description |
 |---------|----------|-------------|
@@ -137,12 +109,12 @@ Schema: `v2/defs/spec.schema.json`
 | `apply` | No | Trigger settings |
 
 **FK resolution (runtime):**
-- `access.posture` → `v2/postures/{value}.yaml`
+- `access.posture` → `postures/{value}.yaml`
 - `access.users[].ssh_keys[]` → `secrets.yaml → ssh_keys.{value}`
 
 ### Auth Model (Config Phase)
 
-Authentication for the config phase ensures nodes are authorized to fetch their specs. The auth method is determined by posture, with optional node-level override.
+Authentication for the config phase ensures nodes are authorized to fetch their specs. The auth method is determined by posture.
 
 **Auth methods by posture:**
 
@@ -153,27 +125,12 @@ Authentication for the config phase ensures nodes are authorized to fetch their 
 | stage | `site_token` | `secrets.auth.site_token` | Shared site-wide token |
 | prod | `node_token` | `secrets.auth.node_tokens.{name}` | Per-node unique token |
 
-**Flow:**
-1. **create**: Token injected via cloud-init (if required by posture)
-2. **config**: Node presents token when calling `homestak spec get`
-3. **Server**: Validates token before serving spec
-
-**Node-level override:**
-```yaml
-# v2/nodes/secure-node.yaml
-type: vm
-spec: base
-auth:
-  method: node_token  # Override posture default
-  token: secure-node  # FK to secrets.auth.node_tokens.secure-node
-```
-
 **Posture schema:**
 
-Schema: `v2/defs/posture.schema.json`
+Schema: `defs/posture.schema.json`
 
 ```yaml
-# v2/postures/stage.yaml
+# postures/stage.yaml
 auth:
   method: site_token
 
@@ -293,36 +250,40 @@ make node-config FORCE=1
 ```
 
 ### postures/{name}.yaml
-Security posture configuration for environments.
+Security posture configuration with nested structure and auth model.
 Primary key derived from filename (e.g., `dev.yaml` → `dev`).
-Referenced by envs via `posture:` FK.
+Referenced by envs via `posture:` FK and specs via `access.posture:` FK.
 
-- `ssh_port` - SSH port (default: 22)
-- `ssh_permit_root_login` - Root login policy (yes/no/prohibit-password)
-- `ssh_password_authentication` - Password auth policy (yes/no)
-- `sudo_nopasswd` - Passwordless sudo (bool)
-- `fail2ban_enabled` - Enable fail2ban (bool)
+Schema: `defs/posture.schema.json`
+
+- `auth.method` - Auth method: `network`, `site_token`, `node_token`
+- `ssh.port` - SSH port (default: 22)
+- `ssh.permit_root_login` - Root login policy (yes/no/prohibit-password)
+- `ssh.password_authentication` - Password auth policy (yes/no)
+- `sudo.nopasswd` - Passwordless sudo (bool)
+- `fail2ban.enabled` - Enable fail2ban (bool)
 - `packages` - Additional packages (merged with site.yaml packages)
 
 Available postures:
-- `dev` - Permissive (SSH password auth, sudo nopasswd)
-- `prod` - Hardened (no root login, fail2ban enabled)
-- `local` - On-box execution posture
+- `dev` - Permissive (network trust, SSH password auth, sudo nopasswd)
+- `stage` - Intermediate (site_token auth, hardened SSH)
+- `prod` - Hardened (node_token auth, no root login, fail2ban enabled)
+- `local` - On-box execution (network trust)
 
-### vms/presets/{size}.yaml
-Size presets for VM resource allocation.
-Primary key derived from filename (e.g., `small.yaml` → `small`).
+### presets/{name}.yaml
+Size presets for VM resource allocation. Uses `vm-` prefix to allow future preset types.
+Primary key derived from filename (e.g., `vm-small.yaml` → `vm-small`).
 - `cores` - Number of CPU cores
 - `memory` - RAM in MB
 - `disk` - Disk size in GB
 
-Available presets: `xsmall` (1c/1GB/8GB), `small` (2c/2GB/10GB), `medium` (2c/4GB/20GB), `large` (4c/8GB/40GB), `xlarge` (8c/16GB/64GB)
+Available presets: `vm-xsmall` (1c/1GB/8GB), `vm-small` (2c/2GB/10GB), `vm-medium` (2c/4GB/20GB), `vm-large` (4c/8GB/40GB), `vm-xlarge` (8c/16GB/64GB)
 
 ### vms/{name}.yaml
-VM template defining base configuration.
+VM template defining base configuration (used by envs/).
 Primary key derived from filename (e.g., `nested-pve.yaml` → `nested-pve`).
 - `image` - Base image name (FK to packer image)
-- `preset` - FK to vms/presets/ (optional, for resource inheritance)
+- `preset` - FK to presets/ (optional, for resource inheritance)
 - `cores` - CPU cores (overrides preset)
 - `memory` - RAM in MB (overrides preset)
 - `disk` - Disk size in GB (overrides preset)
@@ -351,7 +312,7 @@ Primary key derived from filename (e.g., `n2-quick.yaml` → `n2-quick`).
 
 **Level modes (v0.41+):**
 - **env mode**: `env` FK references envs/ (traditional)
-- **vm_preset mode**: `vm_preset` + `vmid` + `image` (simpler, no envs/ dependency)
+- **vm_preset mode**: `vm_preset` + `vmid` + `image` (simpler, FK to presets/)
 
 Schema v1 fields:
 - `schema_version` - Always 1 for linear levels format
@@ -378,8 +339,8 @@ Schema v2 fields (v0.46+):
 - `nodes[]` - List of graph nodes:
   - `name` - Node identifier (VM hostname)
   - `type` - Node type: `vm`, `ct`, `pve`
-  - `spec` - FK to v2/specs/
-  - `preset` - FK to v2/presets/ (vm- prefixed)
+  - `spec` - FK to specs/
+  - `preset` - FK to presets/ (vm- prefixed)
   - `image` - Cloud image name
   - `vmid` - Explicit VM ID
   - `disk` - Disk size override
@@ -444,11 +405,11 @@ make validate # Validate YAML syntax + schemas
 The `scripts/validate-schemas.sh` script validates YAML files against JSON schemas:
 
 ```bash
-# Validate all specs, postures, and v2 manifests
+# Validate all specs, postures, and manifests
 ./scripts/validate-schemas.sh
 
 # Validate specific files
-./scripts/validate-schemas.sh v2/specs/pve.yaml v2/postures/dev.yaml
+./scripts/validate-schemas.sh specs/pve.yaml postures/dev.yaml
 
 # JSON output for CI/scripting
 ./scripts/validate-schemas.sh --json
@@ -457,9 +418,9 @@ The `scripts/validate-schemas.sh` script validates YAML files against JSON schem
 **Schema mapping:**
 | Directory | Schema |
 |-----------|--------|
-| `v2/specs/*.yaml` | `v2/defs/spec.schema.json` |
-| `v2/postures/*.yaml` | `v2/defs/posture.schema.json` |
-| `manifests/*.yaml` (v2) | `v2/defs/manifest.schema.json` |
+| `specs/*.yaml` | `defs/spec.schema.json` |
+| `postures/*.yaml` | `defs/posture.schema.json` |
+| `manifests/*.yaml` (v2) | `defs/manifest.schema.json` |
 
 **Exit codes:**
 - `0` - All files valid
