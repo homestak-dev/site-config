@@ -112,7 +112,7 @@ ip: "10.0.0.1"                    # Node IP for SSH access
 ### presets/vm-{size}.yaml
 ```yaml
 # Presets: vm-xsmall (1c/1G/8G), vm-small (2c/2G/10G), vm-medium (2c/4G/20G),
-#          vm-large (4c/8G/40G), vm-xlarge (8c/16G/64G)
+#          vm-large (4c/8G/40G), vm-xlarge (8c/16G/80G)
 cores: 2
 memory: 4096    # MB
 disk: 20        # GB
