@@ -1,6 +1,0 @@
-# Lightweight nested PVE VM template
-# For deeper nesting levels with constrained memory
-image: debian-13-pve
-cores: 2
-memory: 4096
-disk: 64

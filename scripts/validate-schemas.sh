@@ -35,9 +35,9 @@ usage() {
     echo "  --help     Show this help"
     echo ""
     echo "If no paths given, validates all:"
-    echo "  v2/specs/*.yaml       against v2/defs/spec.schema.json"
-    echo "  v2/postures/*.yaml    against v2/defs/posture.schema.json"
-    echo "  manifests/*.yaml      against v2/defs/manifest.schema.json"
+    echo "  specs/*.yaml       against defs/spec.schema.json"
+    echo "  postures/*.yaml    against defs/posture.schema.json"
+    echo "  manifests/*.yaml   against defs/manifest.schema.json"
     echo ""
     echo "Exit codes:"
     echo "  0  All files valid"
@@ -79,9 +79,9 @@ resolve_schema() {
     local rel_path="${abs_path#"$SITE_CONFIG_DIR/"}"
 
     case "$rel_path" in
-        v2/specs/*.yaml)     echo "$SITE_CONFIG_DIR/v2/defs/spec.schema.json" ;;
-        v2/postures/*.yaml)  echo "$SITE_CONFIG_DIR/v2/defs/posture.schema.json" ;;
-        manifests/*.yaml)    echo "$SITE_CONFIG_DIR/v2/defs/manifest.schema.json" ;;
+        specs/*.yaml)     echo "$SITE_CONFIG_DIR/defs/spec.schema.json" ;;
+        postures/*.yaml)  echo "$SITE_CONFIG_DIR/defs/posture.schema.json" ;;
+        manifests/*.yaml) echo "$SITE_CONFIG_DIR/defs/manifest.schema.json" ;;
         *)
             # Try to infer from sibling defs/ directory
             local dir
@@ -205,32 +205,32 @@ else
     fi
 
     # Specs
-    if ls v2/specs/*.yaml 1>/dev/null 2>&1; then
+    if ls specs/*.yaml 1>/dev/null 2>&1; then
         [[ "$JSON_OUTPUT" != "true" ]] && echo ""
-        [[ "$JSON_OUTPUT" != "true" ]] && echo "Specs (v2/defs/spec.schema.json):"
-        for f in v2/specs/*.yaml; do
-            validate_file "$f" "v2/defs/spec.schema.json" || overall_exit=$?
+        [[ "$JSON_OUTPUT" != "true" ]] && echo "Specs (defs/spec.schema.json):"
+        for f in specs/*.yaml; do
+            validate_file "$f" "defs/spec.schema.json" || overall_exit=$?
         done
     fi
 
     # Postures
-    if ls v2/postures/*.yaml 1>/dev/null 2>&1; then
+    if ls postures/*.yaml 1>/dev/null 2>&1; then
         [[ "$JSON_OUTPUT" != "true" ]] && echo ""
-        [[ "$JSON_OUTPUT" != "true" ]] && echo "Postures (v2/defs/posture.schema.json):"
-        for f in v2/postures/*.yaml; do
-            validate_file "$f" "v2/defs/posture.schema.json" || overall_exit=$?
+        [[ "$JSON_OUTPUT" != "true" ]] && echo "Postures (defs/posture.schema.json):"
+        for f in postures/*.yaml; do
+            validate_file "$f" "defs/posture.schema.json" || overall_exit=$?
         done
     fi
 
     # Manifests (v2 only — schema_version: 2)
     if ls manifests/*.yaml 1>/dev/null 2>&1; then
         [[ "$JSON_OUTPUT" != "true" ]] && echo ""
-        [[ "$JSON_OUTPUT" != "true" ]] && echo "Manifests (v2/defs/manifest.schema.json):"
+        [[ "$JSON_OUTPUT" != "true" ]] && echo "Manifests (defs/manifest.schema.json):"
         for f in manifests/*.yaml; do
             # Only validate v2 manifests (schema_version: 2)
             local_version=$(python3 -c "import yaml; print(yaml.safe_load(open('$f')).get('schema_version', 1))" 2>/dev/null || echo "1")
             if [[ "$local_version" == "2" ]]; then
-                validate_file "$f" "v2/defs/manifest.schema.json" || overall_exit=$?
+                validate_file "$f" "defs/manifest.schema.json" || overall_exit=$?
             else
                 [[ "$JSON_OUTPUT" != "true" ]] && echo -e "  ${YELLOW}-${NC} $f (v1, skipped)"
             fi
