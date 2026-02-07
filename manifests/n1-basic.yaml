@@ -6,6 +6,7 @@ pattern: flat
 nodes:
   - name: edge
     type: vm
+    spec: base
     preset: vm-small
     image: debian-12
     vmid: 99001

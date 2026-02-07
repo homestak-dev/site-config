@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+### Theme: Site-Config/IAC-Driver Cleanup, Pt.2 (homestak-dev#212)
+
+Retire v1 config entities and consolidate specs.
+
+### Removed
+- Delete `envs/` directory — v1 deployment topologies replaced by manifests (#58)
+- Delete `vms/` directory — v1 VM templates replaced by manifests + presets (#58)
+- Delete `specs/edge.yaml` and `specs/test.yaml` — consolidated into `base.yaml` (#58)
+
+### Changed
+- Promote `specs/base.yaml` from empty no-op to general-purpose VM spec (user, packages, timezone) (#58)
+- Add `spec:` field to all manifest nodes for declarative intent (#58)
+- Update Makefile: validate `specs/*.yaml` instead of `envs/*.yaml` (#58)
+- Update CLAUDE.md: remove envs/vms entities, document 2-archetype spec model (#58)
+- Fix `defs/manifest.schema.json` spec FK description: remove stale `v2/` prefix (#58)
+
 ### Changed
 - Consolidate `v2/` into top-level directories (#53)
   - `v2/postures/` → `postures/` (replaces v1 flat postures with nested format + auth model)

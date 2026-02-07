@@ -4,11 +4,13 @@ Site-specific configuration for [homestak](https://github.com/homestak-dev) depl
 
 ## Overview
 
-Normalized 4-entity configuration structure separating:
+Configuration entities:
 - **hosts/** - Physical machines (SSH access, storage, network)
 - **nodes/** - PVE instances (API access)
-- **vms/** - VM templates (Phase 5)
-- **envs/** - Deployment topology templates (node-agnostic)
+- **postures/** - Security postures (SSH, sudo, auth model)
+- **specs/** - Node specifications (what to become: packages, users, services)
+- **presets/** - VM size presets (cores, memory, disk)
+- **manifests/** - Deployment topologies (graph-based node orchestration)
 
 All secrets are centralized in a single encrypted `secrets.yaml` file.
 
@@ -47,17 +49,21 @@ make encrypt
 
 ```
 site-config/
-├── site.yaml              # Non-sensitive defaults (timezone, datastore)
+├── site.yaml              # Non-sensitive defaults (timezone, packages)
 ├── secrets.yaml           # ALL secrets (encrypted with SOPS)
 ├── hosts/                 # Physical machines
-│   └── {name}.yaml        # SSH access (Phase 4: network, storage)
+│   └── {name}.yaml        # SSH access, network, storage
 ├── nodes/                 # PVE instances
 │   └── {name}.yaml        # API endpoint, token ref, IP, datastore
-├── vms/                   # VM templates
-│   ├── presets/           # Size presets (xsmall, small, medium, large, xlarge)
-│   └── {name}.yaml        # Custom templates (image, preset, overrides)
-└── envs/                  # Deployment topology templates (node-agnostic)
-    └── {name}.yaml        # Host specified at deploy time
+├── postures/              # Security postures
+│   └── {name}.yaml        # SSH, sudo, auth model settings
+├── specs/                 # Node specifications
+│   ├── base.yaml          # General-purpose VM (user, packages, timezone)
+│   └── pve.yaml           # PVE hypervisor (proxmox packages, services)
+├── presets/               # Size presets (vm- prefix)
+│   └── vm-{size}.yaml     # cores, memory, disk
+└── manifests/             # Deployment topologies
+    └── {name}.yaml        # Graph-based node orchestration
 ```
 
 ## Schema
@@ -103,64 +109,66 @@ api_token: pve                    # FK -> secrets.api_tokens.pve
 ip: "10.0.0.1"                    # Node IP for SSH access
 ```
 
-### vms/presets/{size}.yaml
+### presets/vm-{size}.yaml
 ```yaml
-# Presets: xsmall (1c/1G/8G), small (2c/2G/8G), medium (2c/4G/16G),
-#          large (4c/8G/32G), xlarge (8c/16G/64G)
+# Presets: vm-xsmall (1c/1G/8G), vm-small (2c/2G/10G), vm-medium (2c/4G/20G),
+#          vm-large (4c/8G/40G), vm-xlarge (8c/16G/80G)
 cores: 2
 memory: 4096    # MB
-disk: 16        # GB
+disk: 20        # GB
 ```
 
-### vms/{name}.yaml
+### specs/{name}.yaml
 ```yaml
-# Primary key derived from filename: test.yaml -> test
-image: debian-12
-preset: small            # FK -> vms/presets/small.yaml (optional)
-# cores, memory, disk override preset if specified
+# Specifications define "what a node should become"
+schema_version: 1
+
+access:
+  posture: dev                     # FK -> postures/dev.yaml
+  users:
+    - name: homestak
+      sudo: true
+      ssh_keys:
+        - ssh_keys.admin@host      # FK -> secrets.ssh_keys
+
+platform:
+  packages:
+    - htop
+    - curl
+
+config:
+  timezone: America/Denver
 ```
 
-### envs/{name}.yaml
+### manifests/{name}.yaml
 ```yaml
-# Primary key derived from filename: dev.yaml -> dev
-# Node-agnostic template - target host specified at deploy time
-vmid_base: 10000         # Auto-increment: base + index (omit for PVE auto-assign)
-
-vms:
-  - name: dev1
-    template: test       # FK -> vms/test.yaml
-  - name: dev2
-    template: test
-    vmid: 50001          # Override: explicit vmid
+# Graph-based deployment topology
+schema_version: 2
+name: n1-basic
+pattern: flat
+nodes:
+  - name: edge
+    type: vm
+    spec: base                     # FK -> specs/base.yaml
+    preset: vm-small               # FK -> presets/vm-small.yaml
+    image: debian-12
+    vmid: 99001
 ```
 
 ## Deploy Pattern
 
-Envs are node-agnostic templates. The `--env` flag selects which `envs/*.yaml` template to deploy, while `--host` determines the target Proxmox node.
+Manifests define deployment topologies. Use verb commands via iac-driver:
 
 ```bash
-# Example assumes two Proxmox Virtual Environment (PVE) hosts: father and mother
+# Deploy infrastructure from manifest
+cd ../iac-driver && ./run.sh create -M n1-basic -H father
 
-# Deploy dev environment to your primary host
-homestak scenario vm-constructor --host father --env dev
+# Full roundtrip: create, verify SSH, destroy
+./run.sh test -M n2-quick -H father
 
-# Same environment on a different host (node-agnostic!)
-homestak scenario vm-constructor --host mother --env dev
-
-# Deploy a different environment (k8s cluster, etc.)
-homestak scenario vm-constructor --host father --env k8s
-
-# Tear down when done (caution: no confirmation prompt, destroys immediately)
-homestak scenario vm-destructor --host father --env dev
-
-# Quick test - deploy, verify SSH works, destroy
-homestak scenario vm-roundtrip --host father --env test
-
-# See what scenarios are available
-homestak scenario --list
+# Tear down
+./run.sh destroy -M n1-basic -H father --yes
 ```
-
-Define your own environments by creating `envs/{name}.yaml` (see schema above).
 
 ## Encryption
 
