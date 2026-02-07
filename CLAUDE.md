@@ -277,7 +277,7 @@ Primary key derived from filename (e.g., `vm-small.yaml` → `vm-small`).
 - `memory` - RAM in MB
 - `disk` - Disk size in GB
 
-Available presets: `vm-xsmall` (1c/1GB/8GB), `vm-small` (2c/2GB/10GB), `vm-medium` (2c/4GB/20GB), `vm-large` (4c/8GB/40GB), `vm-xlarge` (8c/16GB/64GB)
+Available presets: `vm-xsmall` (1c/1GB/8GB), `vm-small` (2c/2GB/10GB), `vm-medium` (2c/4GB/20GB), `vm-large` (4c/8GB/40GB), `vm-xlarge` (8c/16GB/80GB)
 
 ### manifests/{name}.yaml
 Manifest definitions for infrastructure orchestration.
