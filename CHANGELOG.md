@@ -13,6 +13,7 @@
   - `n3-full-v2.yaml` → `n3-full.yaml`
 
 ### Fixed
+- Fix `edge.yaml` spec SSH key FK: `ssh_keys.jderose@father` (was dangling `ssh_keys.jderose`) (iac-driver#163)
 - Fix `validate-schemas.sh` exit code in `--json` mode (bootstrap#40)
   - JSON mode now correctly exits 1 for invalid files (was exiting 0)
 
