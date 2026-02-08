@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Bug Fixes
+- Fix spurious secrets.yaml.enc re-encryption on every commit (#60)
+
 ### Theme: Site-Config/IAC-Driver Cleanup, Pt.3 (homestak-dev#219)
 
 ### Changed
