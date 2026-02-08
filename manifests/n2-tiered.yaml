@@ -1,6 +1,6 @@
 schema_version: 2
-name: n3-full
-description: "3-level Root PVE + Leaf PVE + Test VM"
+name: n2-tiered
+description: "2-level Nested PVE + Test VM"
 pattern: tiered
 
 nodes:
@@ -12,18 +12,10 @@ nodes:
     vmid: 99011
     disk: 64
 
-  - name: leaf-pve
-    type: pve
-    spec: pve
-    preset: vm-medium
-    image: debian-13-pve
-    vmid: 99021
-    parent: root-pve
-
   - name: edge
     type: vm
     spec: base
     preset: vm-small
     image: debian-12
-    vmid: 99031
-    parent: leaf-pve
+    vmid: 99021
+    parent: root-pve
