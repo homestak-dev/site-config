@@ -58,9 +58,9 @@ site-config/
 │   ├── vm-large.yaml
 │   └── vm-xlarge.yaml
 └── manifests/             # Manifest definitions (v0.39+)
-    ├── n1-basic.yaml      # Flat single-node test
-    ├── n2-quick.yaml      # 2-level nested PVE test
-    └── n3-full.yaml       # 3-level nested PVE test
+    ├── n1-push.yaml       # Flat single-node test (push mode)
+    ├── n2-tiered.yaml     # 2-level nested PVE test
+    └── n3-deep.yaml       # 3-level nested PVE test
 ```
 
 ## Lifecycle Configuration
@@ -281,7 +281,7 @@ Available presets: `vm-xsmall` (1c/1GB/8GB), `vm-small` (2c/2GB/10GB), `vm-mediu
 
 ### manifests/{name}.yaml
 Manifest definitions for infrastructure orchestration.
-Primary key derived from filename (e.g., `n2-quick.yaml` → `n2-quick`).
+Primary key derived from filename (e.g., `n2-tiered.yaml` → `n2-tiered`).
 
 Schema v2 fields:
 - `schema_version` - Must be 2 for graph-based nodes format
@@ -301,7 +301,7 @@ Schema v2 fields:
 - `settings` - Optional settings (same as v1, plus `on_error`)
   - `on_error` - Error handling: `stop`, `rollback`, `continue` (default: stop)
 
-Built-in manifests: `n1-basic` (flat), `n1-pull` (flat, pull mode), `n2-quick` (tiered 2-level), `n3-full` (tiered 3-level)
+Built-in manifests: `n1-push` (flat, push mode), `n1-pull` (flat, pull mode), `n2-tiered` (tiered 2-level), `n3-deep` (tiered 3-level)
 
 ## Discovery Mechanism
 

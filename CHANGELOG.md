@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Theme: Site-Config/IAC-Driver Cleanup, Pt.3 (homestak-dev#219)
+
+### Changed
+- Rename manifests: `n1-basic` → `n1-push`, `n2-quick` → `n2-tiered`, `n3-full` → `n3-deep` (homestak-dev#214)
+- Update CLAUDE.md manifest references to match new names (homestak-dev#214)
+
 ### Theme: Site-Config/IAC-Driver Cleanup, Pt.2 (homestak-dev#212)
 
 Retire v1 config entities and consolidate specs.

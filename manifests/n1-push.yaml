@@ -1,5 +1,5 @@
 schema_version: 2
-name: n1-basic
+name: n1-push
 description: "1-level Test VM"
 pattern: flat
 
