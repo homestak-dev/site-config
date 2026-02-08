@@ -17,6 +17,10 @@ if [ -f "secrets.yaml.enc" ]; then
         if ! sops -d "secrets.yaml.enc" > "secrets.yaml" 2>/dev/null; then
             echo "Warning: Failed to decrypt secrets.yaml.enc (wrong key?)"
             rm -f "secrets.yaml"
+        else
+            # Reset timestamp so .enc is newer than plaintext, preventing
+            # spurious re-encryption in pre-commit (site-config#60)
+            touch "secrets.yaml.enc"
         fi
     fi
 fi
