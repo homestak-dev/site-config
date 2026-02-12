@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+- Add `auth.signing_key` to secrets.yaml for provisioning token HMAC verification (iac-driver#187)
+- Update spec.schema.json identity description to reference hostname instead of HOMESTAK_IDENTITY (iac-driver#187)
+
 ### Bug Fixes
 - Fix spurious secrets.yaml.enc re-encryption on every commit (#60)
 

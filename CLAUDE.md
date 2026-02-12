@@ -112,18 +112,13 @@ Schema: `defs/spec.schema.json`
 | `base` | General-purpose VM: user with sudo, ssh keys, packages, timezone |
 | `pve` | PVE hypervisor: proxmox packages, services, PVE config |
 
-### Auth Model (Config Phase)
+### Auth Model (Config Phase, #231)
 
-Authentication for the config phase ensures nodes are authorized to fetch their specs. The auth method is determined by posture.
+Authentication for the config phase uses HMAC-SHA256 provisioning tokens. ConfigResolver mints a token per-VM carrying the node identity and spec FK. The server verifies the signature against `secrets.auth.signing_key`.
 
-**Auth methods by posture:**
+**Token flow:** ConfigResolver → `auth_token` in tfvars → cloud-init `HOMESTAK_TOKEN` → server `verify_provisioning_token()`
 
-| Posture | Auth Method | Token Source | Description |
-|---------|-------------|--------------|-------------|
-| dev | `network` | none | Trust network boundary |
-| local | `network` | none | On-box execution |
-| stage | `site_token` | `secrets.auth.site_token` | Shared site-wide token |
-| prod | `node_token` | `secrets.auth.node_tokens.{name}` | Per-node unique token |
+**Note:** Posture files still contain `auth.method` (network/site_token/node_token) which is used for SSH/sudo/security settings but no longer drives spec authentication.
 
 **Posture schema:**
 
@@ -161,7 +156,7 @@ Non-sensitive defaults inherited by all entities:
 - `defaults.packages` - Base packages installed on all VMs
 - `defaults.pve_remove_subscription_nag` - Remove PVE subscription popup (bool)
 - `defaults.packer_release` - Packer release for image downloads (default: `latest`)
-- `defaults.spec_server` - Spec server URL for create → config flow (v0.45+, default: empty/disabled)
+- `defaults.spec_server` - Spec server URL for create → config flow (default: empty/disabled)
 
 **Note:** `datastore` was moved to nodes/ in v0.13 - it's now required per-node.
 
@@ -172,17 +167,13 @@ ALL sensitive values in one file (encrypted):
 - `api_tokens.{node}` - Proxmox API tokens
 - `passwords.vm_root` - VM root password hash
 - `ssh_keys.{user@host}` - SSH public keys (identifier matches key comment)
-- `auth.site_token` - Shared token for stage posture (v0.43+)
-- `auth.node_tokens.{name}` - Per-node tokens for prod posture (v0.43+)
+- `auth.signing_key` - HMAC-SHA256 signing key for provisioning tokens (#231)
 
-**Auth tokens (v0.43+):**
+**Signing key:**
 ```yaml
-# secrets.yaml structure for config phase authentication
+# secrets.yaml structure for provisioning token authentication
 auth:
-  site_token: "shared-secret-for-staging"  # Used by stage posture
-  node_tokens:
-    dev1: "unique-token-for-dev1"          # Used by prod posture
-    dev2: "unique-token-for-dev2"
+  signing_key: "<hex-encoded 256-bit key>"  # Generate: python3 -c "import secrets; print(secrets.token_hex(32))"
 ```
 
 ### hosts/{name}.yaml
@@ -256,7 +247,7 @@ Referenced by specs via `access.posture:` FK.
 
 Schema: `defs/posture.schema.json`
 
-- `auth.method` - Auth method: `network`, `site_token`, `node_token`
+- `auth.method` - Auth method (vestigial for spec auth, used for posture labeling)
 - `ssh.port` - SSH port (default: 22)
 - `ssh.permit_root_login` - Root login policy (yes/no/prohibit-password)
 - `ssh.password_authentication` - Password auth policy (yes/no)
@@ -265,10 +256,10 @@ Schema: `defs/posture.schema.json`
 - `packages` - Additional packages (merged with site.yaml packages)
 
 Available postures:
-- `dev` - Permissive (network trust, SSH password auth, sudo nopasswd)
-- `stage` - Intermediate (site_token auth, hardened SSH)
-- `prod` - Hardened (node_token auth, no root login, fail2ban enabled)
-- `local` - On-box execution (network trust)
+- `dev` - Permissive (SSH password auth, sudo nopasswd)
+- `stage` - Intermediate (hardened SSH, sudo requires password)
+- `prod` - Hardened (no root login, fail2ban enabled)
+- `local` - On-box execution (same as dev)
 
 ### presets/{name}.yaml
 Size presets for VM resource allocation. Uses `vm-` prefix to allow future preset types.

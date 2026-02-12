@@ -13,11 +13,11 @@
     },
     "identity": {
       "type": "object",
-      "description": "Optional - defaults from HOMESTAK_IDENTITY and site.yaml",
+      "description": "Optional - defaults from hostname and site.yaml",
       "properties": {
         "hostname": {
           "type": "string",
-          "description": "VM hostname, defaults to HOMESTAK_IDENTITY"
+          "description": "VM hostname, defaults to system hostname"
         },
         "domain": {
           "type": "string",
