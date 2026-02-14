@@ -97,6 +97,7 @@ decrypt:
 	@if [ -f secrets.yaml.enc ]; then \
 		echo "Decrypting: secrets.yaml.enc -> secrets.yaml"; \
 		sops --input-type yaml --output-type yaml -d secrets.yaml.enc > secrets.yaml || (rm -f secrets.yaml && exit 1); \
+		chmod 600 secrets.yaml; \
 		echo "Done."; \
 	else \
 		echo "No secrets.yaml.enc found. Nothing to decrypt."; \
