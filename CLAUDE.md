@@ -188,7 +188,7 @@ Primary key derived from filename (e.g., `father.yaml` → `father`).
 - `network.interfaces.{bridge}` - Bridge configurations:
   - `type` - Interface type (bridge)
   - `ports` - Physical ports attached to bridge
-  - `address` - IP address with CIDR (e.g., 10.0.12.61/24)
+  - `address` - IP address with CIDR (e.g., 198.51.100.61/24)
   - `gateway` - Default gateway (if default route uses this bridge)
 
 **Storage section:**
