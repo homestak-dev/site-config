@@ -59,8 +59,10 @@ site-config/
 │   └── vm-xlarge.yaml
 └── manifests/             # Manifest definitions (v0.39+)
     ├── n1-push.yaml       # Flat single-node test (push mode)
-    ├── n2-tiered.yaml     # 2-level nested PVE test
-    └── n3-deep.yaml       # 3-level nested PVE test
+    ├── n1-pull.yaml       # Flat single-node test (pull mode)
+    ├── n2-tiered.yaml     # 2-level tiered PVE test
+    ├── n2-mixed.yaml      # Push-mode PVE + pull-mode VM (ST-5)
+    └── n3-deep.yaml       # 3-level tiered PVE test
 ```
 
 ## Lifecycle Configuration
@@ -292,7 +294,7 @@ Schema v2 fields:
 - `settings` - Optional settings (same as v1, plus `on_error`)
   - `on_error` - Error handling: `stop`, `rollback`, `continue` (default: stop)
 
-Built-in manifests: `n1-push` (flat, push mode), `n1-pull` (flat, pull mode), `n2-tiered` (tiered 2-level), `n3-deep` (tiered 3-level)
+Built-in manifests: `n1-push` (flat, push mode), `n1-pull` (flat, pull mode), `n2-tiered` (tiered 2-level), `n2-mixed` (tiered, push-mode PVE + pull-mode VM), `n3-deep` (tiered 3-level)
 
 ## Discovery Mechanism
 
