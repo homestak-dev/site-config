@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Fixed
+- Restrict secrets.yaml to 600 permissions after decrypt in Makefile and post-checkout hook (iac-driver#199)
+
 ### Changed
 - Add `auth.signing_key` to secrets.yaml for provisioning token HMAC verification (iac-driver#187)
 - Update spec.schema.json identity description to reference hostname instead of HOMESTAK_IDENTITY (iac-driver#187)

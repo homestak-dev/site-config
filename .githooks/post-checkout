@@ -18,6 +18,7 @@ if [ -f "secrets.yaml.enc" ]; then
             echo "Warning: Failed to decrypt secrets.yaml.enc (wrong key?)"
             rm -f "secrets.yaml"
         else
+            chmod 600 "secrets.yaml"
             # Reset timestamp so .enc is newer than plaintext, preventing
             # spurious re-encryption in pre-commit (site-config#60)
             touch "secrets.yaml.enc"
