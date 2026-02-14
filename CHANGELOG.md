@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Added
+- Add `manifests/n2-mixed.yaml` for ST-5 mixed-mode validation (push PVE + pull leaf VM) (#67)
+
 ### Fixed
 - Restrict secrets.yaml to 600 permissions after decrypt in Makefile and post-checkout hook (iac-driver#199)
 
