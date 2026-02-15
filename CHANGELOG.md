@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Changed
+- Update manifest image references: `debian-13-pve` → `pve-9` in n2-tiered, n2-mixed, n3-deep (packer#48)
+
 ### Added
 - Add `manifests/n2-mixed.yaml` for ST-5 mixed-mode validation (push PVE + pull leaf VM) (#67)
 
