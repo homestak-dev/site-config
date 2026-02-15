@@ -8,7 +8,7 @@ nodes:
     type: pve
     spec: pve
     preset: vm-large
-    image: debian-13-pve
+    image: pve-9
     vmid: 99011
     disk: 64
 
@@ -16,7 +16,7 @@ nodes:
     type: pve
     spec: pve
     preset: vm-medium
-    image: debian-13-pve
+    image: pve-9
     vmid: 99021
     parent: root-pve
 
