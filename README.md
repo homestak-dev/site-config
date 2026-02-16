@@ -76,7 +76,6 @@ Foreign keys (FK) are explicit references between entities.
 defaults:
   timezone: America/Denver
   domain: local
-  datastore: local-zfs
   ssh_user: root
 ```
 
@@ -157,17 +156,17 @@ nodes:
 
 ## Deploy Pattern
 
-Manifests define deployment topologies. Use verb commands via iac-driver:
+Manifests define deployment topologies. Use iac-driver to execute:
 
 ```bash
 # Deploy infrastructure from manifest
-cd ../iac-driver && ./run.sh create -M n1-basic -H father
+cd ../iac-driver && ./run.sh manifest apply -M n1-push -H father
 
 # Full roundtrip: create, verify SSH, destroy
-./run.sh test -M n2-quick -H father
+./run.sh manifest test -M n1-push -H father
 
 # Tear down
-./run.sh destroy -M n1-basic -H father --yes
+./run.sh manifest destroy -M n1-push -H father --yes
 ```
 
 ## Encryption
@@ -218,8 +217,8 @@ make host-config FORCE=1
 
 Tools find site-config via:
 1. `$HOMESTAK_SITE_CONFIG` environment variable
-2. `../site-config/` sibling directory
-3. `/opt/homestak/site-config/` (bootstrap default)
+2. `../site-config/` sibling directory (dev workspace)
+3. `/usr/local/etc/homestak/` (bootstrap default)
 
 ## Third-Party Acknowledgments
 
