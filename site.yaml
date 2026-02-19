@@ -12,6 +12,8 @@ defaults:
   ssh_user: root
   bridge: vmbr0
   gateway: 10.0.12.1
+  dns_servers:
+    - 10.0.12.1
 
   # Base packages installed on all VMs
   packages:
