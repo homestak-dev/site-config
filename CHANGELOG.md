@@ -3,7 +3,7 @@
 ## Unreleased
 
 ### Added
-- Add `dns_servers` to site.yaml defaults — explicit DNS config for cloud-init provisioned VMs (iac-driver#229)
+- Add `dns_servers` to site.yaml defaults — explicit DNS config for VMs provisioned via cloud-init (iac-driver#229)
 
 ### Changed
 - Update manifest image references: `debian-13-pve` → `pve-9` in n2-tiered, n2-mixed, n3-deep (packer#48)
