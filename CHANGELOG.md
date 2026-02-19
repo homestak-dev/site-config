@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Added
+- Add `dns_servers` to site.yaml defaults — explicit DNS config for VMs provisioned via cloud-init (iac-driver#229)
+
 ### Fixed
 - Emit `interfaces: {}` instead of bare `interfaces:` (YAML null) when no bridges exist in `host-config.sh` (homestak-dev#266)
 
