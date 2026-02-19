@@ -103,14 +103,20 @@ else
     echo "# domain: example.com  # Set manually if needed"
 fi
 
-cat <<EOF
-
-network:
-  interfaces:
-EOF
-
 # Get bridges and their config
-for bridge in $(ip -j link show type bridge 2>/dev/null | python3 -c "import sys,json; [print(x['ifname']) for x in json.load(sys.stdin)]" 2>/dev/null || true); do
+BRIDGES=$(ip -j link show type bridge 2>/dev/null | python3 -c "import sys,json; [print(x['ifname']) for x in json.load(sys.stdin)]" 2>/dev/null || true)
+
+if [ -z "$BRIDGES" ]; then
+    echo ""
+    echo "network:"
+    echo "  interfaces: {}"
+else
+    echo ""
+    echo "network:"
+    echo "  interfaces:"
+fi
+
+for bridge in $BRIDGES; do
     # Get IP address for this bridge
     ip_addr=$(ip -j addr show dev "$bridge" 2>/dev/null | python3 -c "
 import sys, json
