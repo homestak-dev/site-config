@@ -4,20 +4,14 @@
 
 ### Added
 - Add `dns_servers` to site.yaml defaults — explicit DNS config for VMs provisioned via cloud-init (iac-driver#229)
-
-### Fixed
-- Emit `interfaces: {}` instead of bare `interfaces:` (YAML null) when no bridges exist in `host-config.sh` (homestak-dev#266)
-
-### Changed
-- Update manifest image references: `debian-13-pve` → `pve-9` in n2-tiered, n2-mixed, n3-deep (packer#48)
-
-### Added
 - Add `manifests/n2-mixed.yaml` for ST-5 mixed-mode validation (push PVE + pull leaf VM) (#67)
 
 ### Fixed
+- Emit `interfaces: {}` instead of bare `interfaces:` (YAML null) when no bridges exist in `host-config.sh` (homestak-dev#266)
 - Restrict secrets.yaml to 600 permissions after decrypt in Makefile and post-checkout hook (iac-driver#199)
 
 ### Changed
+- Update manifest image references: `debian-13-pve` → `pve-9` in n2-tiered, n2-mixed, n3-deep (packer#48)
 - Add `auth.signing_key` to secrets.yaml for provisioning token HMAC verification (iac-driver#187)
 - Update spec.schema.json identity description to reference hostname instead of HOMESTAK_IDENTITY (iac-driver#187)
 
