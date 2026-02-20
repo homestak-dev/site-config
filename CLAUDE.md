@@ -159,6 +159,7 @@ Non-sensitive defaults inherited by all entities:
 - `defaults.pve_remove_subscription_nag` - Remove PVE subscription popup (bool)
 - `defaults.packer_release` - Packer release for image downloads (default: `latest`)
 - `defaults.spec_server` - Spec server URL for create → config flow (default: empty/disabled)
+- `defaults.dns_servers` - DNS servers for VMs and PVE bridge config (list of IPs, default: empty)
 
 **Note:** `datastore` was moved to nodes/ in v0.13 - it's now required per-node.
 
