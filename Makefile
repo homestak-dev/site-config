@@ -11,7 +11,7 @@
 
 SOPS_VERSION := 3.11.0
 
-.PHONY: help setup install-deps init-secrets decrypt encrypt clean check validate test lint host-config node-config
+.PHONY: help setup install-deps init-site init-secrets decrypt encrypt clean check validate test lint host-config node-config
 
 help:
 	@echo "site-config - Site-specific configuration management"
@@ -19,6 +19,7 @@ help:
 	@echo "Setup:"
 	@echo "  make install-deps  - Install age and sops (requires root)"
 	@echo "  make setup         - Configure git hooks and check dependencies"
+	@echo "  make init-site     - Create site.yaml from template"
 	@echo "  make init-secrets  - Create secrets.yaml from template"
 	@echo ""
 	@echo "Config Generation (run on target host):"
@@ -34,7 +35,7 @@ help:
 	@echo "Validation:"
 	@echo "  make validate    - Validate YAML syntax + schemas"
 	@echo ""
-	@echo "New users: run 'make init-secrets' to get started."
+	@echo "New users: run 'make init-site && make init-secrets' to get started."
 	@echo "Encryption is optional — see README for SOPS/age setup."
 
 install-deps:
@@ -65,6 +66,12 @@ install-deps:
 setup:
 	@echo "Configuring git hooks..."
 	@git config core.hooksPath .githooks
+	@echo "Checking for site.yaml..."
+	@if [ -f site.yaml ]; then \
+		echo "  site.yaml exists."; \
+	elif [ -f site.yaml.example ]; then \
+		echo "  No site.yaml found. Run 'make init-site' to create from template."; \
+	fi
 	@echo "Checking for secrets.yaml..."
 	@if [ -f secrets.yaml ]; then \
 		echo "  secrets.yaml exists."; \
@@ -84,6 +91,18 @@ setup:
 	fi
 	@echo ""
 	@echo "Setup complete."
+
+init-site:
+	@if [ -f site.yaml ]; then \
+		echo "site.yaml already exists. Nothing to do."; \
+	elif [ -f site.yaml.example ]; then \
+		echo "Initializing: site.yaml from site.yaml.example"; \
+		cp site.yaml.example site.yaml; \
+		echo "Done. Edit site.yaml to set gateway, dns_servers for your network."; \
+	else \
+		echo "ERROR: No site.yaml.example found."; \
+		exit 1; \
+	fi
 
 init-secrets:
 	@if [ -f secrets.yaml ]; then \

@@ -12,8 +12,8 @@ defaults:
   # EDIT: DNS servers for VMs and PVE bridge config
   dns_servers: []
 
-  # EDIT: Local domain (used for hostname resolution)
-  domain: local
+  # EDIT (optional): Local domain (used for hostname resolution, e.g., home.arpa)
+  domain: ""
 
   # ── System ───────────────────────────────────────────
   # System timezone (default: UTC)

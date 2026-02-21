@@ -1,5 +1,6 @@
-# Secrets (plaintext and encrypted are both local-only)
-# Use secrets.yaml.example as a starting template
+# Site config and secrets are local-only
+# Use *.example as starting templates
+site.yaml
 secrets.yaml
 secrets.yaml.enc
 
