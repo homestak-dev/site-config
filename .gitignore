@@ -1,14 +1,13 @@
-# Plaintext secrets (never commit)
+# Secrets (plaintext and encrypted are both local-only)
+# Use secrets.yaml.example as a starting template
 secrets.yaml
+secrets.yaml.enc
 
 # Site-specific configs (generated per-deployment via make host-config, make node-config)
 hosts/*.yaml
 nodes/*.yaml
 # Keep nested-pve.yaml tracked for integration testing
 !nodes/nested-pve.yaml
-
-# Encrypted secrets (committed to enable sharing with private forks)
-# The plaintext secrets.yaml is still gitignored above
 
 # Editor files
 *.swp

@@ -1,18 +1,10 @@
 #!/bin/bash
-# Auto-encrypt secrets.yaml, block plaintext commits
+# Block plaintext secrets.yaml from being committed
+# Optionally auto-encrypt if .enc workflow is active
 
 set -e
 
 cd "$(git rev-parse --show-toplevel)"
-
-# Auto-encrypt secrets.yaml if it's newer than secrets.yaml.enc
-if [ -f "secrets.yaml" ]; then
-    if [ ! -f "secrets.yaml.enc" ] || [ "secrets.yaml" -nt "secrets.yaml.enc" ]; then
-        echo "Encrypting: secrets.yaml -> secrets.yaml.enc"
-        sops -e "secrets.yaml" > "secrets.yaml.enc"
-        git add "secrets.yaml.enc"
-    fi
-fi
 
 # Block plaintext secrets.yaml from being committed
 if git diff --cached --name-only | grep -q "^secrets\.yaml$"; then
@@ -22,10 +14,10 @@ if git diff --cached --name-only | grep -q "^secrets\.yaml$"; then
     exit 1
 fi
 
-# Verify staged secrets.yaml.enc is actually encrypted
-if git diff --cached --name-only | grep -q "^secrets\.yaml\.enc$"; then
-    if [ -f "secrets.yaml.enc" ] && ! grep -qE '(^sops:|"sops":)' "secrets.yaml.enc" 2>/dev/null; then
-        echo "ERROR: secrets.yaml.enc doesn't appear to be SOPS-encrypted"
-        exit 1
+# Auto-encrypt if the .enc workflow is active (user has both sops and existing .enc)
+if [ -f "secrets.yaml" ] && [ -f "secrets.yaml.enc" ] && command -v sops >/dev/null 2>&1; then
+    if [ "secrets.yaml" -nt "secrets.yaml.enc" ]; then
+        echo "Encrypting: secrets.yaml -> secrets.yaml.enc"
+        sops -e "secrets.yaml" > "secrets.yaml.enc"
     fi
 fi
