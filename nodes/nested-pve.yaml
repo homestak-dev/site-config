@@ -1,7 +1,0 @@
-# Nested PVE instance (runs as VM, no physical host)
-# Primary key derived from filename: nested-pve.yaml -> nested-pve
-# Parent node determined at deploy time via: ./run.sh --host <parent>
-api_endpoint: "https://localhost:8006"
-api_token: nested-pve     # FK -> secrets.api_tokens.nested-pve
-datastore: local
-# ip: (dynamic - assigned at runtime via DHCP, detected by guest agent)

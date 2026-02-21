@@ -6,8 +6,6 @@ secrets.yaml.enc
 # Site-specific configs (generated per-deployment via make host-config, make node-config)
 hosts/*.yaml
 nodes/*.yaml
-# Keep nested-pve.yaml tracked for integration testing
-!nodes/nested-pve.yaml
 
 # Editor files
 *.swp
