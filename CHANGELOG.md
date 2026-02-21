@@ -5,12 +5,22 @@
 ### Added
 - Add `dns_servers` to site.yaml defaults — explicit DNS config for VMs provisioned via cloud-init (iac-driver#229)
 - Add `manifests/n2-mixed.yaml` for ST-5 mixed-mode validation (push PVE + pull leaf VM) (#67)
+- Add `site.yaml.example` template — site.yaml now gitignored like secrets.yaml; local values never committed
+- Add `make init-site` target — copy `.example` to `.yaml` if missing
+- Add `secrets.yaml.example` template — new users get a working secrets.yaml without age key (#77)
+- Add `make init-secrets` target — decrypt `.enc` or copy `.example` (#77)
 
 ### Fixed
 - Emit `interfaces: {}` instead of bare `interfaces:` (YAML null) when no bridges exist in `host-config.sh` (homestak-dev#266)
 - Restrict secrets.yaml to 600 permissions after decrypt in Makefile and post-checkout hook (iac-driver#199)
 
 ### Changed
+- Reorganize site.yaml for new-user clarity — grouped by concern (Network/System/Provisioning/Proxmox), EDIT markers, blanked IPs (#78)
+- Blank `domain` default (was `local` — conflicts with mDNS); mark as optional
+- Replace tracked `site.yaml` and `secrets.yaml.enc` with gitignored local-only files; ship `.example` templates instead (#77)
+- Remove vestigial `nodes/nested-pve.yaml` — operator generates node configs dynamically (#77)
+- Remove hardcoded SSH key FKs from specs — omitted `ssh_keys` now injects all keys from `secrets.ssh_keys` (#82)
+- Soften `make setup` — age/sops now optional for new users (#77)
 - Update manifest image references: `debian-13-pve` → `pve-9` in n2-tiered, n2-mixed, n3-deep (packer#48)
 - Add `auth.signing_key` to secrets.yaml for provisioning token HMAC verification (iac-driver#187)
 - Update spec.schema.json identity description to reference hostname instead of HOMESTAK_IDENTITY (iac-driver#187)
