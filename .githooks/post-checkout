@@ -1,27 +1,47 @@
 #!/bin/bash
-# Auto-decrypt secrets.yaml.enc after checkout
+# Auto-provision secrets.yaml after checkout
+#
+# Priority:
+# 1. Decrypt secrets.yaml.enc (existing users with age key)
+# 2. Copy secrets.yaml.example (new users)
+# 3. Do nothing (secrets.yaml already exists)
 
 cd "$(git rev-parse --show-toplevel)"
 
-# Check if age key exists
-if [ ! -f ~/.config/sops/age/keys.txt ]; then
-    echo "Warning: No age key found at ~/.config/sops/age/keys.txt"
-    echo "Run 'make setup' for instructions on setting up decryption."
+# Already have plaintext secrets — nothing to do
+if [ -f "secrets.yaml" ]; then
+    # But if .enc is newer, re-decrypt
+    if [ -f "secrets.yaml.enc" ] && [ "secrets.yaml.enc" -nt "secrets.yaml" ]; then
+        if [ -f ~/.config/sops/age/keys.txt ]; then
+            echo "Decrypting: secrets.yaml.enc -> secrets.yaml"
+            if sops -d "secrets.yaml.enc" > "secrets.yaml.tmp" 2>/dev/null; then
+                mv "secrets.yaml.tmp" "secrets.yaml"
+                chmod 600 "secrets.yaml"
+                touch "secrets.yaml.enc"
+            else
+                rm -f "secrets.yaml.tmp"
+                echo "Warning: Failed to decrypt secrets.yaml.enc (wrong key?)"
+            fi
+        fi
+    fi
     exit 0
 fi
 
-# Decrypt secrets.yaml.enc if plaintext is missing or older
-if [ -f "secrets.yaml.enc" ]; then
-    if [ ! -f "secrets.yaml" ] || [ "secrets.yaml.enc" -nt "secrets.yaml" ]; then
-        echo "Decrypting: secrets.yaml.enc -> secrets.yaml"
-        if ! sops -d "secrets.yaml.enc" > "secrets.yaml" 2>/dev/null; then
-            echo "Warning: Failed to decrypt secrets.yaml.enc (wrong key?)"
-            rm -f "secrets.yaml"
-        else
-            chmod 600 "secrets.yaml"
-            # Reset timestamp so .enc is newer than plaintext, preventing
-            # spurious re-encryption in pre-commit (site-config#60)
-            touch "secrets.yaml.enc"
-        fi
+# Try decrypting .enc file (existing users)
+if [ -f "secrets.yaml.enc" ] && [ -f ~/.config/sops/age/keys.txt ]; then
+    echo "Decrypting: secrets.yaml.enc -> secrets.yaml"
+    if sops -d "secrets.yaml.enc" > "secrets.yaml" 2>/dev/null; then
+        chmod 600 "secrets.yaml"
+        touch "secrets.yaml.enc"
+        exit 0
     fi
+    rm -f "secrets.yaml"
+    echo "Warning: Failed to decrypt secrets.yaml.enc (wrong key?)"
+fi
+
+# Fall back to example template (new users)
+if [ -f "secrets.yaml.example" ]; then
+    echo "Initializing: secrets.yaml from secrets.yaml.example"
+    cp "secrets.yaml.example" "secrets.yaml"
+    chmod 600 "secrets.yaml"
 fi

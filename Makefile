@@ -2,41 +2,40 @@
 # Secrets management for homestak deployments
 #
 # Structure:
-#   secrets.yaml     - ALL sensitive values (encrypted)
-#   site.yaml        - Non-sensitive defaults
-#   hosts/*.yaml     - Physical machine config
-#   nodes/*.yaml     - PVE instance config
-#   specs/*.yaml     - Node specifications
+#   secrets.yaml         - Sensitive values (local, gitignored)
+#   secrets.yaml.example - Template for new deployments
+#   site.yaml            - Non-sensitive defaults
+#   hosts/*.yaml         - Physical machine config
+#   nodes/*.yaml         - PVE instance config
+#   specs/*.yaml         - Node specifications
 
 SOPS_VERSION := 3.11.0
 
-.PHONY: help setup install-deps decrypt encrypt clean check validate test lint host-config node-config
+.PHONY: help setup install-deps init-secrets decrypt encrypt clean check validate test lint host-config node-config
 
 help:
 	@echo "site-config - Site-specific configuration management"
 	@echo ""
 	@echo "Setup:"
-	@echo "  make install-deps - Install age and sops (requires root)"
-	@echo "  make setup        - Configure git hooks and check dependencies"
+	@echo "  make install-deps  - Install age and sops (requires root)"
+	@echo "  make setup         - Configure git hooks and check dependencies"
+	@echo "  make init-secrets  - Create secrets.yaml from template"
 	@echo ""
 	@echo "Config Generation (run on target host):"
 	@echo "  make host-config - Generate hosts/{hostname}.yaml from system info"
 	@echo "  make node-config - Generate nodes/{hostname}.yaml from PVE info"
 	@echo ""
-	@echo "Secrets Management:"
+	@echo "Secrets Management (optional, for encryption):"
 	@echo "  make decrypt     - Decrypt secrets.yaml.enc to secrets.yaml"
 	@echo "  make encrypt     - Encrypt secrets.yaml to secrets.yaml.enc"
 	@echo "  make clean       - Remove plaintext secrets.yaml (keeps .enc)"
-	@echo "  make check       - Verify encryption setup"
+	@echo "  make check       - Verify setup status"
 	@echo ""
 	@echo "Validation:"
 	@echo "  make validate    - Validate YAML syntax + schemas"
 	@echo ""
-	@echo "Prerequisites: Run 'sudo make install-deps' or install manually:"
-	@echo "  - age:  apt install age"
-	@echo "  - sops: https://github.com/getsops/sops/releases"
-	@echo ""
-	@echo "Age key location: ~/.config/sops/age/keys.txt"
+	@echo "New users: run 'make init-secrets' to get started."
+	@echo "Encryption is optional — see README for SOPS/age setup."
 
 install-deps:
 	@echo "Installing dependencies..."
@@ -66,27 +65,43 @@ install-deps:
 setup:
 	@echo "Configuring git hooks..."
 	@git config core.hooksPath .githooks
-	@echo "Checking dependencies..."
-	@which age >/dev/null 2>&1 || (echo "ERROR: age not installed. Run: apt install age" && exit 1)
-	@which sops >/dev/null 2>&1 || (echo "ERROR: sops not installed. See: https://github.com/getsops/sops/releases" && exit 1)
-	@echo "Checking for age key..."
+	@echo "Checking for secrets.yaml..."
+	@if [ -f secrets.yaml ]; then \
+		echo "  secrets.yaml exists."; \
+	elif [ -f secrets.yaml.enc ]; then \
+		echo "  Found secrets.yaml.enc — run 'make decrypt' to restore."; \
+	elif [ -f secrets.yaml.example ]; then \
+		echo "  No secrets.yaml found. Run 'make init-secrets' to create from template."; \
+	fi
+	@echo ""
+	@echo "Checking encryption tools (optional)..."
+	@printf "  age:  " && (which age >/dev/null 2>&1 && echo "installed" || echo "not installed (optional)")
+	@printf "  sops: " && (which sops >/dev/null 2>&1 && echo "installed" || echo "not installed (optional)")
 	@if [ -f ~/.config/sops/age/keys.txt ]; then \
-		echo "Age key found."; \
-		echo ""; \
-		echo "IMPORTANT: Update .sops.yaml with your public key:"; \
-		grep "public key:" ~/.config/sops/age/keys.txt; \
+		echo "  Age key: found"; \
 	else \
-		echo ""; \
-		echo "No age key found. To generate a new key:"; \
-		echo "  mkdir -p ~/.config/sops/age"; \
-		echo "  age-keygen -o ~/.config/sops/age/keys.txt"; \
-		echo "  chmod 600 ~/.config/sops/age/keys.txt"; \
-		echo ""; \
-		echo "Then update .sops.yaml with your public key."; \
-		echo ""; \
+		echo "  Age key: not found (optional — needed only for encryption)"; \
 	fi
 	@echo ""
 	@echo "Setup complete."
+
+init-secrets:
+	@if [ -f secrets.yaml ]; then \
+		echo "secrets.yaml already exists. Nothing to do."; \
+	elif [ -f secrets.yaml.enc ] && [ -f ~/.config/sops/age/keys.txt ] && command -v sops >/dev/null 2>&1; then \
+		echo "Decrypting: secrets.yaml.enc -> secrets.yaml"; \
+		sops --input-type yaml --output-type yaml -d secrets.yaml.enc > secrets.yaml || (rm -f secrets.yaml && exit 1); \
+		chmod 600 secrets.yaml; \
+		echo "Done."; \
+	elif [ -f secrets.yaml.example ]; then \
+		echo "Initializing: secrets.yaml from secrets.yaml.example"; \
+		cp secrets.yaml.example secrets.yaml; \
+		chmod 600 secrets.yaml; \
+		echo "Done. Values will be populated by 'homestak pve-setup'."; \
+	else \
+		echo "ERROR: No secrets.yaml.example found."; \
+		exit 1; \
+	fi
 
 decrypt:
 	@if [ ! -f ~/.config/sops/age/keys.txt ]; then \
@@ -111,11 +126,6 @@ encrypt:
 	@echo "Encrypting: secrets.yaml -> secrets.yaml.enc"
 	@sops --input-type yaml --output-type yaml -e secrets.yaml > secrets.yaml.enc
 	@echo "Done."
-	@echo ""
-	@echo "To commit encrypted secrets to a private fork:"
-	@echo "  1. Remove secrets.yaml.enc from .gitignore"
-	@echo "  2. git add secrets.yaml.enc"
-	@echo "  3. git commit"
 
 clean:
 	@echo "Removing plaintext secrets..."
@@ -125,7 +135,7 @@ clean:
 check:
 	@echo "Checking setup..."
 	@echo ""
-	@echo "Dependencies:"
+	@echo "Encryption tools (optional):"
 	@printf "  age:  " && (which age >/dev/null 2>&1 && age --version || echo "NOT INSTALLED")
 	@printf "  sops: " && (which sops >/dev/null 2>&1 && sops --version 2>&1 | head -1 || echo "NOT INSTALLED")
 	@echo ""
@@ -137,12 +147,13 @@ check:
 		echo "  Found: ~/.config/sops/age/keys.txt"; \
 		grep "public key:" ~/.config/sops/age/keys.txt || true; \
 	else \
-		echo "  NOT FOUND"; \
+		echo "  NOT FOUND (optional)"; \
 	fi
 	@echo ""
-	@echo "Secrets file:"
+	@echo "Secrets:"
+	@if [ -f secrets.yaml ]; then echo "  secrets.yaml: EXISTS"; else echo "  secrets.yaml: NOT FOUND"; fi
 	@if [ -f secrets.yaml.enc ]; then echo "  secrets.yaml.enc: EXISTS"; else echo "  secrets.yaml.enc: NOT FOUND"; fi
-	@if [ -f secrets.yaml ]; then echo "  secrets.yaml: EXISTS (plaintext)"; else echo "  secrets.yaml: NOT FOUND"; fi
+	@if [ -f secrets.yaml.example ]; then echo "  secrets.yaml.example: EXISTS"; else echo "  secrets.yaml.example: NOT FOUND"; fi
 	@echo ""
 	@echo "Config files:"
 	@printf "  site.yaml:   " && ([ -f site.yaml ] && echo "EXISTS" || echo "NOT FOUND")
