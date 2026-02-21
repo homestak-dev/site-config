@@ -1,21 +1,26 @@
-# Site-wide defaults (non-sensitive)
+# site.yaml — Site-wide defaults (non-sensitive)
 # Sensitive values are in secrets.yaml
+#
+# All fields are optional — missing fields use safe defaults.
+# Fields marked EDIT should be reviewed for your network.
 
 defaults:
-  timezone: America/Denver
-  domain: local
-  # datastore removed in v0.13 - now required in nodes/*.yaml
-  # Run 'make node-config FORCE=1' to regenerate node configs
-  # automation_user: user created in VMs via cloud-init (with sudo)
-  # ssh_user: user for SSH to PVE hosts (typically root)
-  automation_user: homestak
-  ssh_user: root
-  bridge: vmbr0
-  gateway: 10.0.12.1
-  dns_servers:
-    - 10.0.12.1
+  # ── Network ──────────────────────────────────────────
+  # EDIT: Your router/gateway IP (e.g., 192.168.1.1)
+  gateway: ""
 
-  # Base packages installed on all VMs
+  # EDIT: DNS servers for VMs and PVE bridge config
+  dns_servers: []
+
+  # EDIT: Local domain (used for hostname resolution)
+  domain: local
+
+  # ── System ───────────────────────────────────────────
+  # System timezone (default: UTC)
+  timezone: America/Denver
+
+  # ── Provisioning ─────────────────────────────────────
+  # Packages installed on all VMs via cloud-init
   packages:
     - htop
     - curl
@@ -27,11 +32,13 @@ defaults:
     - jq
     - rsync
 
-  # Proxmox settings
-  pve_remove_subscription_nag: true
+  # User created on VMs via cloud-init (with sudo access)
+  automation_user: homestak
 
-  # Spec server for Create → Specify flow (v0.45+)
-  # Empty string means spec discovery disabled
-  # Use FQDN (not short hostname) - VMs resolve via DNS search domain
-  # Note: HTTP (not HTTPS) - server uses Python HTTPServer
-  spec_server: "https://father.core:44443"
+  # Spec server for automated VM configuration (empty = disabled)
+  # Populated after first host runs 'homestak pve-setup'
+  spec_server: ""
+
+  # ── Proxmox ─────────────────────────────────────────
+  # Network bridge for VMs (default: vmbr0)
+  bridge: vmbr0
