@@ -80,7 +80,7 @@
                 "items": {
                   "type": "string"
                 },
-                "description": "FKs to secrets.yaml ssh_keys.*"
+                "description": "Key identifiers from secrets.ssh_keys (omit to inject all)"
               }
             },
             "additionalProperties": false
