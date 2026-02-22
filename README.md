@@ -21,27 +21,19 @@ All secrets are centralized in a single encrypted `secrets.yaml` file.
 git clone https://github.com/homestak-dev/site-config.git
 cd site-config
 
-# Setup encryption
+# Initial setup (age/sops optional for new users)
 make setup
 
-# On your PVE host: auto-generate config from system inventory
+# Create local config files from .example templates
+make init-site       # → site.yaml (from site.yaml.example)
+make init-secrets    # → secrets.yaml (from secrets.yaml.example, or decrypts .enc if age key exists)
+
+# Edit site.yaml and secrets.yaml with your values
+# Then on your PVE host: auto-generate config from system inventory
 make host-config    # → hosts/{hostname}.yaml
 make node-config    # → nodes/{hostname}.yaml
 
-# Create secrets.yaml with your values
-cat > secrets.yaml << 'EOF'
-api_tokens:
-  pve: "root@pam!tofu=YOUR-TOKEN-HERE"
-
-passwords:
-  vm_root: "$6$YOUR-HASH-HERE"
-
-ssh_keys:
-  # Key identifiers use user@host convention
-  admin@workstation: "ssh-rsa YOUR-KEY-HERE admin@workstation"
-EOF
-
-# Encrypt secrets
+# When ready, set up encryption and encrypt secrets
 make encrypt
 ```
 
@@ -49,8 +41,10 @@ make encrypt
 
 ```
 site-config/
-├── site.yaml              # Non-sensitive defaults (timezone, packages)
-├── secrets.yaml           # ALL secrets (encrypted with SOPS)
+├── site.yaml.example      # Template for site defaults (tracked)
+├── site.yaml              # Local site defaults (gitignored, from .example)
+├── secrets.yaml.example   # Template for secrets (tracked)
+├── secrets.yaml           # Local secrets (gitignored, from .example or .enc)
 ├── hosts/                 # Physical machines
 │   └── {name}.yaml        # SSH access, network, storage
 ├── nodes/                 # PVE instances
@@ -75,7 +69,7 @@ Foreign keys (FK) are explicit references between entities.
 ```yaml
 defaults:
   timezone: America/Denver
-  domain: local
+  domain: ""               # Optional, blank by default
   ssh_user: root
 ```
 
@@ -171,39 +165,43 @@ cd ../iac-driver && ./run.sh manifest apply -M n1-push -H father
 
 ## Encryption
 
-Only `secrets.yaml` is encrypted - all other config is non-sensitive.
+Only `secrets.yaml` is encrypted - all other config is non-sensitive. Both `site.yaml` and `secrets.yaml` are gitignored; the repo ships `.example` templates that are copied to create local files.
 
 ### Setup
 
-1. Install dependencies:
+1. Run setup (age/sops are optional for new users):
    ```bash
-   sudo make install-deps
+   make setup
    ```
 
-2. Generate age key:
+2. Create local config files from templates:
    ```bash
+   make init-site       # Copy site.yaml.example → site.yaml
+   make init-secrets    # Decrypt .enc (if age key exists) or copy .example → secrets.yaml
+   ```
+
+3. (Optional) For full encryption support, install dependencies and generate an age key:
+   ```bash
+   sudo make install-deps
    mkdir -p ~/.config/sops/age
    age-keygen -o ~/.config/sops/age/keys.txt
    chmod 600 ~/.config/sops/age/keys.txt
    ```
 
-3. Update `.sops.yaml` with your public key
-
-4. Run setup:
-   ```bash
-   make setup
-   ```
+4. Update `.sops.yaml` with your public key
 
 ### Commands
 
 | Command | Description |
 |---------|-------------|
 | `make install-deps` | Install age and sops (requires root) |
-| `make setup` | Configure git hooks, check dependencies |
+| `make setup` | Configure git hooks, check dependencies (age/sops optional) |
+| `make init-site` | Create site.yaml from site.yaml.example |
+| `make init-secrets` | Decrypt .enc or copy .example to create secrets.yaml |
 | `make host-config` | Generate hosts/{hostname}.yaml from system info |
 | `make node-config` | Generate nodes/{hostname}.yaml from PVE info |
 | `make encrypt` | Encrypt secrets.yaml |
-| `make decrypt` | Decrypt secrets.yaml.enc |
+| `make decrypt` | Decrypt secrets.yaml.enc (sets 600 permissions) |
 | `make clean` | Remove plaintext secrets.yaml |
 | `make check` | Show setup status |
 | `make validate` | Validate YAML syntax |
