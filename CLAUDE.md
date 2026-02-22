@@ -31,9 +31,10 @@ Foreign keys (FK) are explicit references between entities.
 
 ```
 site-config/
-├── site.yaml              # Non-sensitive site-wide defaults
-├── secrets.yaml           # ALL sensitive values (SOPS encrypted)
-├── secrets.yaml.enc       # Encrypted version (committed to private forks)
+├── site.yaml.example      # Template for site-wide defaults (tracked)
+├── site.yaml              # Local site-wide defaults (gitignored, created from .example)
+├── secrets.yaml.example   # Template for secrets (tracked)
+├── secrets.yaml           # Local secrets (gitignored, created from .example or decrypted from .enc)
 ├── defs/                  # JSON Schema definitions
 │   ├── spec.schema.json
 │   ├── posture.schema.json
@@ -41,8 +42,7 @@ site-config/
 ├── hosts/                 # Physical machines
 │   └── {name}.yaml        # SSH access (Phase 4: network, storage)
 ├── nodes/                 # PVE instances (filename must match PVE node name)
-│   ├── {nodename}.yaml    # e.g., father.yaml for node named "father"
-│   └── nested-pve.yaml    # Nested PVE (parent_node reference)
+│   └── {nodename}.yaml    # e.g., father.yaml for node named "father"
 ├── postures/              # Security postures with auth model
 │   ├── dev.yaml           # network trust, permissive SSH
 │   ├── stage.yaml         # site_token auth, hardened SSH
@@ -64,6 +64,19 @@ site-config/
     ├── n2-mixed.yaml      # Push-mode PVE + pull-mode VM (ST-5)
     └── n3-deep.yaml       # 3-level tiered PVE test
 ```
+
+## Template Pattern (.example files)
+
+The repo ships `.example` template files; actual config files are gitignored and created locally:
+
+| Template | Local File | Created By |
+|----------|-----------|------------|
+| `site.yaml.example` | `site.yaml` | `make init-site` |
+| `secrets.yaml.example` | `secrets.yaml` | `make init-secrets` |
+
+- `make init-site` copies `site.yaml.example` to `site.yaml` if it doesn't exist
+- `make init-secrets` decrypts `secrets.yaml.enc` if an age key is available, otherwise copies `secrets.yaml.example`
+- This allows new users to get started without an age key (they get a working template to edit)
 
 ## Lifecycle Configuration
 
@@ -96,16 +109,18 @@ Schema: `defs/spec.schema.json`
 | Section | Required | Description |
 |---------|----------|-------------|
 | `schema_version` | Yes | Must be `1` |
-| `identity` | No | Hostname/domain, defaults from `HOMESTAK_IDENTITY` |
+| `identity` | No | Hostname/domain, defaults from hostname and site.yaml |
 | `network` | No | Static IP config, omit for DHCP |
 | `access` | No | Posture + users, defaults to `dev` posture |
 | `platform` | No | Packages + services |
 | `config` | No | Type-specific configuration |
-| `apply` | No | Trigger settings |
+| `run` | No | Run phase convergence settings |
 
 **FK resolution (runtime):**
 - `access.posture` → `postures/{value}.yaml`
 - `access.users[].ssh_keys[]` → `secrets.yaml → ssh_keys.{value}`
+
+**SSH key default:** When `ssh_keys` is omitted from a spec's user entry, all keys from `secrets.ssh_keys` are injected automatically. Explicit `ssh_keys[]` entries restrict injection to only the listed keys.
 
 **Available specs:**
 
@@ -151,7 +166,7 @@ packages:
 ### site.yaml
 Non-sensitive defaults inherited by all entities:
 - `defaults.timezone` - System timezone (e.g., America/Denver)
-- `defaults.domain` - Network domain
+- `defaults.domain` - Network domain (optional, blank by default)
 - `defaults.ssh_user` - Default SSH user (typically root)
 - `defaults.bridge` - Default network bridge
 - `defaults.gateway` - Default gateway for static IPs
@@ -236,7 +251,7 @@ Primary key derived from filename (e.g., `father.yaml` → `father`).
 - `datastore` - Storage for VMs (REQUIRED in v0.13+)
 - `ip` - Node IP for SSH access
 
-**Git tracking:** Site-specific node configs (e.g., `father.yaml`, `mother.yaml`) are excluded from git via `.gitignore`. Only `nested-pve.yaml` is tracked (required for integration testing). Generate your node config with `make node-config` on each PVE host.
+**Git tracking:** All node configs are excluded from git via `.gitignore`. The operator generates node configs dynamically via `make node-config` on each PVE host.
 
 **Migration (v0.13):** If upgrading from earlier versions, regenerate node configs:
 ```bash
@@ -334,17 +349,23 @@ make node-config FORCE=1
 `host-config` gathers: domain, network bridges, ZFS pools, hardware (CPU/RAM), SSH settings
 `node-config` gathers: PVE API endpoint, datastore, IP address (requires PVE installed)
 
+**Note:** `host-config.sh` emits `interfaces: {}` (empty map) when no bridges exist, avoiding a bare `interfaces:` (YAML null) that would cause downstream parsing issues.
+
 ## Secrets Management
 
 Only `secrets.yaml` is encrypted - all other files are non-sensitive.
 
 ```bash
-make setup    # Configure git hooks, check dependencies
-make encrypt  # Encrypt secrets.yaml -> secrets.yaml.enc
-make decrypt  # Decrypt secrets.yaml.enc -> secrets.yaml
-make check    # Show setup status
-make validate # Validate YAML syntax + schemas
+make setup        # Configure git hooks, check dependencies (age/sops optional)
+make init-site    # Create site.yaml from site.yaml.example (if missing)
+make init-secrets # Decrypt secrets.yaml.enc or copy secrets.yaml.example (if missing)
+make encrypt      # Encrypt secrets.yaml -> secrets.yaml.enc
+make decrypt      # Decrypt secrets.yaml.enc -> secrets.yaml (sets 600 permissions)
+make check        # Show setup status
+make validate     # Validate YAML syntax + schemas
 ```
+
+**Note:** `make setup` no longer requires age/sops to be installed. New users can run setup, then `make init-site` and `make init-secrets` to get working config files from the `.example` templates without encryption tooling.
 
 ### Schema Validation
 
@@ -375,9 +396,13 @@ The `scripts/validate-schemas.sh` script validates YAML files against JSON schem
 
 Requires `python3-jsonschema` (apt install python3-jsonschema).
 
+### File Permissions
+
+`secrets.yaml` is set to `600` (owner read/write only) after decryption, both by `make decrypt` and the post-checkout git hook. This prevents accidental exposure of plaintext secrets.
+
 ### Git Hooks
 - **pre-commit**: Auto-encrypts secrets.yaml, blocks plaintext commits
-- **post-checkout**: Auto-decrypts secrets.yaml.enc
+- **post-checkout**: Auto-decrypts secrets.yaml.enc (sets 600 permissions)
 - **post-merge**: Delegates to post-checkout
 
 ## Reference Resolution
