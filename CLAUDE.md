@@ -24,7 +24,7 @@ Site-specific configuration for homestak deployments. Separates concerns: physic
 └─────────────┘     └─────────────┘     └─────────────┘
 ```
 
-**Note:** Primary keys are derived from filenames (e.g., `hosts/father.yaml` → identifier is `father`).
+**Note:** Primary keys are derived from filenames (e.g., `hosts/srv1.yaml` → identifier is `srv1`).
 Foreign keys (FK) are explicit references between entities.
 
 ## Structure
@@ -42,7 +42,7 @@ site-config/
 ├── hosts/                 # Physical machines
 │   └── {name}.yaml        # SSH access (Phase 4: network, storage)
 ├── nodes/                 # PVE instances (filename must match PVE node name)
-│   └── {nodename}.yaml    # e.g., father.yaml for node named "father"
+│   └── {nodename}.yaml    # e.g., srv1.yaml for node named "srv1"
 ├── postures/              # Security postures with auth model
 │   ├── dev.yaml           # network trust, permissive SSH
 │   ├── stage.yaml         # site_token auth, hardened SSH
@@ -196,7 +196,7 @@ auth:
 
 ### hosts/{name}.yaml
 Physical machine configuration for SSH access and host management.
-Primary key derived from filename (e.g., `father.yaml` → `father`).
+Primary key derived from filename (e.g., `srv1.yaml` → `srv1`).
 
 **Core fields:**
 - `host` - Hostname (matches filename)
@@ -243,7 +243,7 @@ ssh root@<ip> "cd /usr/local/etc/homestak && make host-config"
 ### nodes/{name}.yaml
 PVE instance configuration for API access.
 **Important:** Filename must match the actual PVE node name (check with `pvesh get /nodes`).
-Primary key derived from filename (e.g., `father.yaml` → `father`).
+Primary key derived from filename (e.g., `srv1.yaml` → `srv1`).
 - `host` - FK to hosts/ (physical machine)
 - `parent_node` - FK to nodes/ (for nested PVE, instead of host)
 - `api_endpoint` - Proxmox API URL
@@ -409,8 +409,8 @@ Requires `python3-jsonschema` (apt install python3-jsonschema).
 
 Config files use references (FK) to secrets.yaml:
 ```yaml
-# nodes/father.yaml
-api_token: father  # Resolves to secrets.api_tokens.father
+# nodes/srv1.yaml
+api_token: srv1  # Resolves to secrets.api_tokens.srv1
 ```
 
 iac-driver's ConfigResolver resolves all references at runtime and generates flat tfvars for tofu.
