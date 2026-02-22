@@ -2,7 +2,10 @@
 
 ## Unreleased
 
+## v0.50 - 2026-02-22
+
 ### Added
+- Add `ssh_user` to `site.yaml.example` template (#87)
 - Add `dns_servers` to site.yaml defaults — explicit DNS config for VMs provisioned via cloud-init (iac-driver#229)
 - Add `manifests/n2-mixed.yaml` for ST-5 mixed-mode validation (push PVE + pull leaf VM) (#67)
 - Add `site.yaml.example` template — site.yaml now gitignored like secrets.yaml; local values never committed
