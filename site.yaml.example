@@ -19,6 +19,9 @@ defaults:
   # System timezone (default: UTC)
   timezone: America/Denver
 
+  # SSH user for remote access (default: current user)
+  ssh_user: root
+
   # ── Provisioning ─────────────────────────────────────
   # Packages installed on all VMs via cloud-init
   packages:
