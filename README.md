@@ -154,13 +154,13 @@ Manifests define deployment topologies. Use iac-driver to execute:
 
 ```bash
 # Deploy infrastructure from manifest
-cd ../iac-driver && ./run.sh manifest apply -M n1-push -H father
+cd ../iac-driver && ./run.sh manifest apply -M n1-push -H srv1
 
 # Full roundtrip: create, verify SSH, destroy
-./run.sh manifest test -M n1-push -H father
+./run.sh manifest test -M n1-push -H srv1
 
 # Tear down
-./run.sh manifest destroy -M n1-push -H father --yes
+./run.sh manifest destroy -M n1-push -H srv1 --yes
 ```
 
 ## Encryption
