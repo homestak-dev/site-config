@@ -12,10 +12,7 @@
 - Add `make init-site` target — copy `.example` to `.yaml` if missing
 - Add `secrets.yaml.example` template — new users get a working secrets.yaml without age key (#77)
 - Add `make init-secrets` target — decrypt `.enc` or copy `.example` (#77)
-
-### Fixed
-- Emit `interfaces: {}` instead of bare `interfaces:` (YAML null) when no bridges exist in `host-config.sh` (homestak-dev#266)
-- Restrict secrets.yaml to 600 permissions after decrypt in Makefile and post-checkout hook (iac-driver#199)
+- Add `auth.signing_key` to secrets.yaml for provisioning token HMAC verification (iac-driver#187)
 
 ### Changed
 - Reorganize site.yaml for new-user clarity — grouped by concern (Network/System/Provisioning/Proxmox), EDIT markers, blanked IPs (#78)
@@ -25,35 +22,14 @@
 - Remove hardcoded SSH key FKs from specs — omitted `ssh_keys` now injects all keys from `secrets.ssh_keys` (#82)
 - Soften `make setup` — age/sops now optional for new users (#77)
 - Update manifest image references: `debian-13-pve` → `pve-9` in n2-tiered, n2-mixed, n3-deep (packer#48)
-- Add `auth.signing_key` to secrets.yaml for provisioning token HMAC verification (iac-driver#187)
 - Update spec.schema.json identity description to reference hostname instead of HOMESTAK_IDENTITY (iac-driver#187)
-
-### Bug Fixes
-- Fix spurious secrets.yaml.enc re-encryption on every commit (#60)
-
-### Theme: Site-Config/IAC-Driver Cleanup, Pt.3 (homestak-dev#219)
-
-### Changed
 - Rename manifests: `n1-basic` → `n1-push`, `n2-quick` → `n2-tiered`, `n3-full` → `n3-deep` (homestak-dev#214)
 - Update CLAUDE.md manifest references to match new names (homestak-dev#214)
-
-### Theme: Site-Config/IAC-Driver Cleanup, Pt.2 (homestak-dev#212)
-
-Retire v1 config entities and consolidate specs.
-
-### Removed
-- Delete `envs/` directory — v1 deployment topologies replaced by manifests (#58)
-- Delete `vms/` directory — v1 VM templates replaced by manifests + presets (#58)
-- Delete `specs/edge.yaml` and `specs/test.yaml` — consolidated into `base.yaml` (#58)
-
-### Changed
 - Promote `specs/base.yaml` from empty no-op to general-purpose VM spec (user, packages, timezone) (#58)
 - Add `spec:` field to all manifest nodes for declarative intent (#58)
 - Update Makefile: validate `specs/*.yaml` instead of `envs/*.yaml` (#58)
 - Update CLAUDE.md: remove envs/vms entities, document 2-archetype spec model (#58)
 - Fix `defs/manifest.schema.json` spec FK description: remove stale `v2/` prefix (#58)
-
-### Changed
 - Consolidate `v2/` into top-level directories (#53)
   - `v2/postures/` → `postures/` (replaces v1 flat postures with nested format + auth model)
   - `v2/specs/` → `specs/`
@@ -62,22 +38,26 @@ Retire v1 config entities and consolidate specs.
   - `v2/` directory retired
 - Update `vms/test.yaml` and `vms/test13.yaml` preset ref: `small` → `vm-small` (#53)
 - Update `validate-schemas.sh` paths from `v2/` prefix to top-level (#53)
-
-### Removed
-- Delete `vms/presets/` (superseded by top-level `presets/` with vm- prefix) (#53)
-- Delete dead artifacts: `envs/k8s.yaml`, `vms/nested-pve-light.yaml` (#53)
-- Remove v1 manifests: `n1-basic.yaml`, `n2-quick.yaml`, `n3-full.yaml` (#51)
-  - v1 schema (linear `levels[]`) deprecated per REQ-ORC-004
-
-### Changed
 - Rename v2 manifests: drop `-v2` suffix (#51)
   - `n1-basic-v2.yaml` → `n1-basic.yaml`
   - `n2-quick-v2.yaml` → `n2-quick.yaml`
   - `n3-full-v2.yaml` → `n3-full.yaml`
 
 ### Fixed
+- Emit `interfaces: {}` instead of bare `interfaces:` (YAML null) when no bridges exist in `host-config.sh` (homestak-dev#266)
+- Restrict secrets.yaml to 600 permissions after decrypt in Makefile and post-checkout hook (iac-driver#199)
+- Fix spurious secrets.yaml.enc re-encryption on every commit (#60)
 - Fix `edge.yaml` spec SSH key FK: `ssh_keys.jderose@father` (was dangling `ssh_keys.jderose`) (iac-driver#163)
 - Fix `validate-schemas.sh` exit code in `--json` mode (bootstrap#40)
+
+### Removed
+- Delete `envs/` directory — v1 deployment topologies replaced by manifests (#58)
+- Delete `vms/` directory — v1 VM templates replaced by manifests + presets (#58)
+- Delete `specs/edge.yaml` and `specs/test.yaml` — consolidated into `base.yaml` (#58)
+- Delete `vms/presets/` (superseded by top-level `presets/` with vm- prefix) (#53)
+- Delete dead artifacts: `envs/k8s.yaml`, `vms/nested-pve-light.yaml` (#53)
+- Remove v1 manifests: `n1-basic.yaml`, `n2-quick.yaml`, `n3-full.yaml` (#51)
+  - v1 schema (linear `levels[]`) deprecated per REQ-ORC-004
   - JSON mode now correctly exits 1 for invalid files (was exiting 0)
 
 ### Changed
