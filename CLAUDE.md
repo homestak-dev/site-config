@@ -232,7 +232,7 @@ Primary key derived from filename (e.g., `srv1.yaml` → `srv1`).
 **iac-driver usage (v0.36+):** When `--host X` is specified and `nodes/X.yaml` doesn't exist, iac-driver falls back to `hosts/X.yaml` for SSH-only access. This enables provisioning fresh Debian hosts before PVE is installed:
 ```bash
 # Create host config on fresh Debian machine
-ssh root@<ip> "cd /usr/local/etc/homestak && make host-config"
+ssh root@<ip> "cd ~homestak/etc && make host-config"
 
 # Provision PVE using hosts/ config (no nodes/ yet)
 ./run.sh --scenario pve-setup --host daughter
@@ -317,7 +317,7 @@ Built-in manifests: `n1-push` (flat, push mode), `n1-pull` (flat, pull mode), `n
 Other homestak tools find site-config via:
 1. `$HOMESTAK_SITE_CONFIG` environment variable
 2. `../site-config/` sibling directory (dev workspace)
-3. `/usr/local/etc/homestak/` (FHS-compliant bootstrap)
+3. `~homestak/etc/` (bootstrap install)
 
 ## Dependency Installation
 
