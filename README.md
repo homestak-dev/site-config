@@ -216,7 +216,7 @@ make host-config FORCE=1
 Tools find site-config via:
 1. `$HOMESTAK_SITE_CONFIG` environment variable
 2. `../site-config/` sibling directory (dev workspace)
-3. `/usr/local/etc/homestak/` (bootstrap default)
+3. `~homestak/etc/` (bootstrap install)
 
 ## Third-Party Acknowledgments
 
