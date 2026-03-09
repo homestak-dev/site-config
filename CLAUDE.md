@@ -1,4 +1,4 @@
-# site-config
+# config
 
 This file provides guidance to Claude Code when working with this repository.
 
@@ -30,7 +30,7 @@ Foreign keys (FK) are explicit references between entities.
 ## Structure
 
 ```
-site-config/
+config/
 ├── site.yaml.example      # Template for site-wide defaults (tracked)
 ├── site.yaml              # Local site-wide defaults (gitignored, created from .example)
 ├── secrets.yaml.example   # Template for secrets (tracked)
@@ -232,7 +232,7 @@ Primary key derived from filename (e.g., `srv1.yaml` → `srv1`).
 **iac-driver usage (v0.36+):** When `--host X` is specified and `nodes/X.yaml` doesn't exist, iac-driver falls back to `hosts/X.yaml` for SSH-only access. This enables provisioning fresh Debian hosts before PVE is installed:
 ```bash
 # Create host config on fresh Debian machine
-ssh root@<ip> "cd ~homestak/etc && make host-config"
+ssh root@<ip> "cd ~homestak/config && make host-config"
 
 # Provision PVE using hosts/ config (no nodes/ yet)
 ./run.sh --scenario pve-setup --host daughter
@@ -314,10 +314,10 @@ Built-in manifests: `n1-push` (flat, push mode), `n1-pull` (flat, pull mode), `n
 
 ## Discovery Mechanism
 
-Other homestak tools find site-config via:
+Other homestak tools find config via:
 1. `$HOMESTAK_SITE_CONFIG` environment variable
-2. `../site-config/` sibling directory (dev workspace)
-3. `~homestak/etc/` (bootstrap install)
+2. `../config/` sibling directory (dev workspace)
+3. `~homestak/config/` (bootstrap install)
 
 ## Dependency Installation
 
@@ -420,9 +420,9 @@ iac-driver's ConfigResolver resolves all references at runtime and generates fla
 | Repo | Uses |
 |------|------|
 | iac-driver | All entities - resolves config for tofu (tfvars.json) and ansible (ansible-vars.json) |
-| tofu | Receives flat tfvars from iac-driver (no direct site-config access) |
+| tofu | Receives flat tfvars from iac-driver (no direct config access) |
 | ansible | Receives resolved vars from iac-driver; uses `hosts/*.yaml` for host configuration |
-| bootstrap | Clones and sets up site-config |
+| bootstrap | Clones and sets up config |
 
 ## Migration from tfvars
 

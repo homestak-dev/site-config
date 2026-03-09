@@ -1,4 +1,4 @@
-# site-config
+# config
 
 Site-specific configuration for [homestak](https://github.com/homestak-dev) deployments.
 
@@ -18,8 +18,8 @@ All secrets are centralized in a single encrypted `secrets.yaml` file.
 
 ```bash
 # Clone the template
-git clone https://github.com/homestak-dev/site-config.git
-cd site-config
+git clone https://github.com/homestak/config.git
+cd config
 
 # Initial setup (age/sops optional for new users)
 make setup
@@ -40,7 +40,7 @@ make encrypt
 ## Structure
 
 ```
-site-config/
+config/
 ├── site.yaml.example      # Template for site defaults (tracked)
 ├── site.yaml              # Local site defaults (gitignored, from .example)
 ├── secrets.yaml.example   # Template for secrets (tracked)
@@ -213,10 +213,10 @@ make host-config FORCE=1
 
 ## Discovery
 
-Tools find site-config via:
+Tools find config via:
 1. `$HOMESTAK_SITE_CONFIG` environment variable
-2. `../site-config/` sibling directory (dev workspace)
-3. `~homestak/etc/` (bootstrap install)
+2. `../config/` sibling directory (dev workspace)
+3. `~homestak/config/` (bootstrap install)
 
 ## Third-Party Acknowledgments
 
@@ -231,11 +231,11 @@ This project relies on excellent open-source tools:
 
 | Repo | Purpose |
 |------|---------|
-| [bootstrap](https://github.com/homestak-dev/bootstrap) | Entry point - curl\|bash setup |
-| [iac-driver](https://github.com/homestak-dev/iac-driver) | Orchestration engine |
-| [ansible](https://github.com/homestak-dev/ansible) | Proxmox host configuration |
-| [tofu](https://github.com/homestak-dev/tofu) | VM provisioning |
-| [packer](https://github.com/homestak-dev/packer) | Custom Debian cloud images |
+| [bootstrap](https://github.com/homestak/bootstrap) | Entry point - curl\|bash setup |
+| [iac-driver](https://github.com/homestak-iac/iac-driver) | Orchestration engine |
+| [ansible](https://github.com/homestak-iac/ansible) | Proxmox host configuration |
+| [tofu](https://github.com/homestak-iac/tofu) | VM provisioning |
+| [packer](https://github.com/homestak-iac/packer) | Custom Debian cloud images |
 
 ## License
 

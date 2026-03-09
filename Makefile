@@ -1,4 +1,4 @@
-# site-config Makefile
+# config Makefile
 # Secrets management for homestak deployments
 #
 # Structure:
@@ -14,7 +14,7 @@ SOPS_VERSION := 3.11.0
 .PHONY: help setup install-deps init-site init-secrets decrypt encrypt clean check validate test lint host-config node-config
 
 help:
-	@echo "site-config - Site-specific configuration management"
+	@echo "config - Site-specific configuration management"
 	@echo ""
 	@echo "Setup:"
 	@echo "  make install-deps  - Install age and sops (requires root)"
