@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Changed
+- Update stale paths for multi-org migration (#94)
+  - `site-config` → `config` in CLAUDE.md, Makefile, README
+  - GitHub URLs updated to `homestak/config`
+- Gitignore `.state/` directory for runtime markers
+
 ## v0.53 - 2026-03-06
 
 No changes.
