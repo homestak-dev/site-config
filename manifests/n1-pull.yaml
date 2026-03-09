@@ -5,7 +5,7 @@
 # The VM self-configures via cloud-init:
 #   1. homestak spec get (fetch spec from controller)
 #   2. ./run.sh config (apply spec via ansible)
-#   3. config-complete.json marker written
+#   3. complete.json marker written
 #
 # The operator polls for the marker instead of SSH-based push.
 
