@@ -6,6 +6,27 @@ This file provides guidance to Claude Code when working with this repository.
 
 Site-specific configuration for homestak deployments. Separates concerns: physical machines, PVE instances, security postures, size presets, node specifications, and deployment manifests.
 
+## Ecosystem Context
+
+This repo is part of the homestak polyrepo workspace. For project architecture,
+development lifecycle, sprint/release process, and cross-repo conventions, see:
+
+- `~/homestak/dev/meta/CLAUDE.md` — primary reference
+- `docs/lifecycle/` in meta — 7-phase development process
+- `docs/CLAUDE-GUIDELINES.md` in meta — documentation standards
+
+When working in a scoped session (this repo only), follow the same sprint/release
+process defined in meta. Use `/session save` before context compaction and
+`/session resume` to restore state in new sessions.
+
+### Agent Boundaries
+
+This agent operates within the following constraints:
+
+- Opens PRs via `homestak-bot`; never merges without human approval
+- Runs lint and validation tools only; never executes infrastructure operations
+- Never accesses `secrets.yaml`, encryption tooling (`sops`/`age`), or `make decrypt/encrypt`
+
 ## Entity Model
 
 ```

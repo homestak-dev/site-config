@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "__ Validation __",
+      "Bash(make validate)",
+      "Bash(make check)",
+      "Bash(yamllint *)",
+      "Bash(python3 *)",
+
+      "__ Claude Code tools __",
+      "Read",
+      "Edit",
+      "Write"
+    ],
+    "deny": [
+      "Bash(sops *)",
+      "Bash(age *)",
+      "Bash(make decrypt)",
+      "Bash(make encrypt)"
+    ]
+  }
+}
