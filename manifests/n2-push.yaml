@@ -1,9 +1,7 @@
 schema_version: 2
-name: n2-mixed
-description: "Mixed-mode: PVE node (push) + pull-mode leaf VM (ST-5)"
+name: n2-push
+description: "2-level: PVE node + push-mode leaf VM"
 pattern: tiered
-execution:
-  default_mode: push
 
 nodes:
   - name: root-pve
@@ -21,5 +19,3 @@ nodes:
     image: debian-12
     vmid: 99021
     parent: root-pve
-    execution:
-      mode: pull

@@ -1,7 +1,9 @@
 schema_version: 2
-name: n2-tiered
-description: "2-level Nested PVE + Test VM"
+name: n2-pull
+description: "2-level: PVE node + pull-mode leaf VM"
 pattern: tiered
+execution:
+  default_mode: push
 
 nodes:
   - name: root-pve
@@ -19,3 +21,5 @@ nodes:
     image: debian-12
     vmid: 99021
     parent: root-pve
+    execution:
+      mode: pull

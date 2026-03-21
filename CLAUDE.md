@@ -81,8 +81,8 @@ config/
 └── manifests/             # Manifest definitions (v0.39+)
     ├── n1-push.yaml       # Flat single-node test (push mode)
     ├── n1-pull.yaml       # Flat single-node test (pull mode)
-    ├── n2-tiered.yaml     # 2-level tiered PVE test
-    ├── n2-mixed.yaml      # Push-mode PVE + pull-mode VM (ST-5)
+    ├── n2-push.yaml     # 2-level tiered PVE test
+    ├── n2-pull.yaml      # Push-mode PVE + pull-mode VM (ST-5)
     └── n3-deep.yaml       # 3-level tiered PVE test
 ```
 
@@ -312,7 +312,7 @@ Available presets: `vm-xsmall` (1c/1GB/8GB), `vm-small` (2c/2GB/10GB), `vm-mediu
 
 ### manifests/{name}.yaml
 Manifest definitions for infrastructure orchestration.
-Primary key derived from filename (e.g., `n2-tiered.yaml` → `n2-tiered`).
+Primary key derived from filename (e.g., `n2-push.yaml` → `n2-push`).
 
 Schema v2 fields:
 - `schema_version` - Must be 2 for graph-based nodes format
@@ -332,7 +332,7 @@ Schema v2 fields:
 - `settings` - Optional settings (same as v1, plus `on_error`)
   - `on_error` - Error handling: `stop`, `rollback`, `continue` (default: stop)
 
-Built-in manifests: `n1-push` (flat, push mode), `n1-pull` (flat, pull mode), `n2-tiered` (tiered 2-level), `n2-mixed` (tiered, push-mode PVE + pull-mode VM), `n3-deep` (tiered 3-level)
+Built-in manifests: `n1-push` (flat, push mode), `n1-pull` (flat, pull mode), `n2-push` (tiered 2-level), `n2-pull` (tiered, push-mode PVE + pull-mode VM), `n3-deep` (tiered 3-level)
 
 ## Discovery Mechanism
 
