@@ -19,8 +19,8 @@ defaults:
   # System timezone (default: UTC)
   timezone: America/Denver
 
-  # SSH user for remote access (default: current user)
-  ssh_user: root
+  # SSH user for PVE host access (default: current user)
+  host_user: root
 
   # ── Provisioning ─────────────────────────────────────
   # Packages installed on all VMs via cloud-init
@@ -36,11 +36,11 @@ defaults:
     - rsync
 
   # User created on VMs via cloud-init (with sudo access)
-  automation_user: homestak
+  vm_user: homestak
 
-  # Spec server for automated VM configuration (empty = disabled)
+  # Server URL for automated VM configuration (empty = disabled)
   # Populated after first host runs 'homestak pve-setup'
-  spec_server: ""
+  server_url: ""
 
   # ── Proxmox ─────────────────────────────────────────
   # Network bridge for VMs (default: vmbr0)

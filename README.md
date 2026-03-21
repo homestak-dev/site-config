@@ -70,7 +70,7 @@ Foreign keys (FK) are explicit references between entities.
 defaults:
   timezone: America/Denver
   domain: ""               # Optional, blank by default
-  ssh_user: root
+  host_user: root
 ```
 
 ### secrets.yaml
@@ -88,7 +88,7 @@ ssh_keys:
 ```yaml
 # Primary key derived from filename: pve.yaml -> pve
 access:
-  ssh_user: root
+  host_user: root
   authorized_keys:
     - admin@workstation           # FK -> secrets.ssh_keys["admin@workstation"]
 ```

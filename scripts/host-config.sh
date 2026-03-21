@@ -185,7 +185,7 @@ echo "  memory_gb: $MEMORY_GB"
 # Access section
 echo ""
 echo "access:"
-echo "  ssh_user: root"
+echo "  host_user: root"
 echo "  ssh_port: $SSH_PORT"
 echo "  authorized_keys: []  # TODO: add user@host references from secrets.ssh_keys"
 

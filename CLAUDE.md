@@ -188,18 +188,19 @@ packages:
 Non-sensitive defaults inherited by all entities:
 - `defaults.timezone` - System timezone (e.g., America/Denver)
 - `defaults.domain` - Network domain (optional, blank by default)
-- `defaults.ssh_user` - Default SSH user (typically root)
+- `defaults.host_user` - SSH user for PVE host access (typically root)
+- `defaults.vm_user` - User created on VMs via cloud-init (default: homestak)
 - `defaults.bridge` - Default network bridge
 - `defaults.gateway` - Default gateway for static IPs
 - `defaults.packages` - Base packages installed on all VMs
 - `defaults.pve_remove_subscription_nag` - Remove PVE subscription popup (bool)
-- `defaults.packer_release` - Packer release for image downloads (default: `latest`)
-- `defaults.spec_server` - Spec server URL for create → config flow (default: empty/disabled)
+- `defaults.image_release` - Image release tag for downloads (default: `latest`)
+- `defaults.server_url` - Server URL for create → config flow (default: empty/disabled)
 - `defaults.dns_servers` - DNS servers for VMs and PVE bridge config (list of IPs, default: empty)
 
 **Note:** `datastore` was moved to nodes/ in v0.13 - it's now required per-node.
 
-**Packer images:** The `latest` release is the primary source for packer images. Most versioned releases don't include images; automation defaults to `packer_release: latest`. Override with a specific version (e.g., `v0.20`) only when needed.
+**Images:** The `latest` release is the primary source for images. Most versioned releases don't include images; automation defaults to `image_release: latest`. Override with a specific version (e.g., `v0.20`) only when needed.
 
 ### secrets.yaml
 ALL sensitive values in one file (encrypted):
@@ -240,7 +241,7 @@ Primary key derived from filename (e.g., `srv1.yaml` → `srv1`).
 - `hardware.memory_gb` - Total RAM in GB
 
 **Access section:**
-- `access.ssh_user` - SSH username (default: root)
+- `access.host_user` - SSH username for host access (default: root)
 - `access.ssh_port` - SSH port (default: 22)
 - `access.authorized_keys` - References to secrets.ssh_keys by user@host identifier (FK)
 

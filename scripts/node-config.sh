@@ -129,10 +129,10 @@ if [ -n "$NODE_IP" ]; then
     echo "ip: $NODE_IP"
 fi
 
-# Add ssh_user comment
+# Add host_user comment
 cat <<EOF
 
-# SSH user for ansible access (default from site.yaml: root)
+# SSH user for host access (default from site.yaml: root)
 # Uncomment to override:
-# ssh_user: root
+# host_user: root
 EOF
