@@ -7,6 +7,8 @@
 - Change `defaults.automation_user` to `defaults.vm_user` in site.yaml (#342)
 - Change `defaults.spec_server` to `defaults.server_url` in site.yaml (#314)
 - Change `defaults.packer_release` to `defaults.image_release` in site.yaml (#318)
+- Change `n2-tiered` manifest to `n2-push` (meta#352)
+- Change `n2-mixed` manifest to `n2-pull` (meta#352)
 
 ## v0.56 - 2026-03-09
 
