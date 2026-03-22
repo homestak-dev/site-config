@@ -4,6 +4,20 @@ Detailed definitions for each config entity type. Primary keys are derived from
 filenames (e.g., `hosts/srv1.yaml` → identifier is `srv1`). Foreign keys (FK) are
 explicit YAML references between entities.
 
+## Key Concepts
+
+**Config** vs **spec** — two different kinds of data in this repo:
+
+- **Config** is site-wide operational settings shared across all nodes: network
+  (gateway, DNS), timezone, packages, credentials. Lives in `site.yaml` and
+  `secrets.yaml`. Answers: "what does this site look like?"
+- **Spec** is per-node desired state: what packages, users, services, and security
+  posture a specific node should have. Lives in `specs/*.yaml`. Answers: "what
+  should this node become?"
+
+Config is the same everywhere. Specs vary per node — a PVE host gets one spec,
+a web server VM gets another. The manifest links nodes to specs via FK.
+
 ## site.yaml
 
 Non-sensitive defaults inherited by all entities:
