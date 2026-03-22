@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.57 - 2026-03-22
+
 ### Changed
 - Change `defaults.ssh_user` to `defaults.host_user` in site.yaml (#342)
 - Change `defaults.automation_user` to `defaults.vm_user` in site.yaml (#342)
